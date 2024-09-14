@@ -4,7 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-    content="Temporal Reasoning: Generalized Grounded Temporal Reasoning with Foundation Models for Language-guided Robot Manipulation">
+    content="G2TRIF - Generalized Grounded Temporal Reasoning for Robot
+    Instruction Following">
   <meta name="keywords" content="Temporal Reasoning, Zero-Shot, Robot Instruction Following ">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Temporal Reasoning</title>
@@ -32,7 +33,8 @@
         <div class="container is-max-desktop">
           <div class="columns is-centered">
             <div class="column has-text-centered">
-              <h1 class="title is-1 publication-title"><span class="dnerf"></span>Generalized Grounded Temporal Reasoning with Foundation Models for Language-guided Robot Manipulation
+              <h1 class="title is-1 publication-title"><span class="dnerf"></span>G<sup>2</sup>TR - Generalized Grounded Temporal Reasoning for Robot
+                Instruction Following via Coupled Pre-trained Models
               </h1>
               <h3 class="title is-4 conference-authors" style="color: rgb(0, 102, 255);"></h3>
               <div class="is-size-5 publication-authors" , style="margin-bottom: 5mm;">
@@ -40,10 +42,12 @@
                   Riya Arora<sup>1*</sup>,</span>
                 <span class="author-block">
                   Niveditha Narendranath<sup>1*</sup>,</span>
+                  
                 <span class="author-block">
                   Aman Tambi<sup>1+</sup>,</span>
-                <span class="author-block">
-                  Sandeep S. Zachariah<sup>1+</sup>,</span>
+                  <span class="author-block">
+                    Sandeep S. Zachariah<sup>1+</sup>,</span>
+                
                 <br>
                 <span class="author-block">
                   Souvik Chakraborty<sup>1</sup>,</span>
@@ -118,12 +122,12 @@
   </section>
 
   <hr>
-
+<!-- 
   <div class="container is-max-desktop has-text-centered">
     <h2 class="subtitle" , style="max-width: 90%; padding-left: 10%;">
-      Through our work, we develop a novel module architecture for zero-shot, grounded, temporal reasoning for effective robot instruction following. We leverage the reasoning abiliies of recent, pre-trained foundation models so that the robot can carry out the desired action by efficient temporal parsing of instruction, temporal resoning over its past observations, semantic grounding of the object(s) of interest and finally activate its motion planner for action.
+      [A short abstract of the paper goes here.]
     </h2>
-  </div>
+  </div> -->
 
   <section class="section">
     <div class="container is-max-desktop">
@@ -132,11 +136,25 @@
       <div class="content is-four-fifths has-text-justified">
         <p>
           <!-- Robust Robot Instruction Following mandates robots to possess  spatial and temporal reasoning capabilities within their environment. While current methodologies have advanced robots' semantic and spatial comprehension, temporal reasoning remains deficient. In tasks requiring action execution, robots are expected to draw upon past observations to aid humans effectively, necessitating a human-level semantic understanding and memory. This paper highlights the challenge and proposes solutions essential for enhancing robots' ability to recall sequences of actions, crucial for assisting humans in diverse scenarios. Figure 1 exemplifies the expected memory-dependent action sequences.        </p> -->
-          Spatial and temporal reasoning are central to robots interpreting everyday instructions from a human partner. Consider the scenario where a human places an object on the table and the robot observing the scene is asked to "pick up the object that was placed on the table”. Grounding such instructions requires the robot to (i) determine which inter-object interactions need to be examined in the past , (ii) grounding the specific interaction in past visual observations and (iii) performing the intended actions such as picking, placing, pushing etc. in the future. 
-
-          Traditional approaches for language grounding to robot actions map instructions to objects in the current world model of the robot with limited or no ability to reason about past interactions. Contemporary approaches combine reasoning over past observations or an explicit memory to inform future plans executed by the robot. However, such approaches are supervised using a fixed set of objects and interactions and rely on hand-crafted features. Recent emergence of foundation models (large visual, language or cross-modal models) pre-trained on internet scale data offer reasoning capabilities in an emergent manner. Hence, our work considers how such models can be leveraged for zero-shot reasoning for grounding instructions that require reasoning over temporally extended interactions. 
-
-          We develop and evaluate a module architecture that performs (i)temporal parsing over the input sentence using in-context prompts to an LLM (ii) a module that determines the validity of textual descriptions of interactions in an image (e.g., the object that was put down)  (iii) a module that grounds the objects of manipulation action into the image and then point cloud space for the motion planner to execute the task. We discuss the modeling choices, accuracy and errors recorded while deploying this approach using a data set collected from an in-hand camera on a Franka Emika Panda robot operating in an indoor setting.
+          Consider the scenario where a human cleans a
+          table and a robot observing the scene is instructed with the task
+          “Remove the cloth using which I wiped the table”. This requires
+          the robot to first recognize the need for temporal reasoning
+          about past events. The robot must then identify the relevant
+          past object interaction, ground the object of interest in the
+          present scene, and execute the task according to the human’s
+          instruction. While previous efforts have enabled temporal reasoning in robots, 
+          they typically rely on supervised learning with
+          hand-crafted features. G<sup>2</sup>TR factorizes the grounded temporal
+          reasoning problem as (i) realizing the problem through human-
+          instruction, (ii) reasoning over the past for candidate interval,
+          (iii) spatial reasoning over the interval for grounding, and (iv)
+          reacquiring object post initial-grounding. We propose address-
+          ing this challenge by leveraging the abilities of pre-trained
+          Multimodel Vision-Language Models (LVLMs) To evaluate our
+          framework, we release a robust dataset comprising 155 video-
+          instruction pairs involving temporal, spatial, and linguistic
+          complexity. Our approach has an average accuracy of 70.10%.
       </div>
   </section>
 
@@ -147,7 +165,7 @@
         <div class="columns is-centered is-vcentered" , padding-left: 7%;>
           <!-- Image Column -->
           <div>
-            <img src="./static/images/Pipeline.png"
+            <img src="./static/images/pipeline_diagram_v2.drawio.png"
               style="border-radius: 30px; border: 2px solid #555555; background-color: azure;" />
           </div>
           <!-- Text Column -->
@@ -164,11 +182,41 @@
 
       <div class="columns is-centered is-vcentered has-text-justified">
         <p>
-          <b>Temporal Reasoning Pipeline:</b> We consider robot instruction following scenarios that require grounded reasoning capabilities over the objects, their semantic relations and past interactions of objects. The grounding is then  leveraged by the robot for motion planning to execute the intended action. We introduce a grounded reasoning pipeline that takes as input a natural language instruction and past visual observations and infer a grounding for the referenced object (its 3D coordinates) for the robot to manipulate. 
-          We factor the overall inference as follows. Firstly, the input instruction is parsed into two main components - the declarative instruction, (referencing past object interactions), and the future actions to be taken on identified objects. This is realized using a Large Language Model. This declarative instruction alongwith past observations from the robot are then fed into a Large Vision Language Model (LVLM) to induce scene understanding and reasoning.
-          Although LVLMs perform well on detecting the presence of objects in a video, they cannot ground or localise (via a bounding box) in the image. Hence, we factor the reasoning pipeline into an object identification function and an object grounding function. While identifying the object, however, LVLMs do not always perform well in returning relative spatial properties of the object which creates a hindrance in our pipeline. Hence, a description of the initial scene is provided to the LVLM. 
-          The output of the LVLM is then parsed to extract the object of interest and its spatial properties which are input to a phase grounding model which provides the object coordinates for manipulation. 
+          <b>Temporal Reasoning Pipeline:</b><br>
+          Our method factorize the
+          grounded temporal reasoning task as (i) interpreting the
+          language instruction as two distinct components: the past
+          context and the required robot action, (ii) reasoning of a
+          video (or image sequence) over time to localize candidate interval 
+          with requisite interaction (iii) performing fine-grained
+          spatial reasoning on this interval to ground target object (iv)
+          re-acquiring this object post interaction.
+
+          <br><br>
+          (i) <b>Temporal Parsing</b>: The parser formlulates the two key questions:
+          a temporal question that determines "when" the described interaction occurs, 
+          and an object-identification question that specifiies "what" objects 
+          is involved in the interaction.
+          <br>
+          (ii) <b>Event Localization</b>: This modules takes in the entire video 
+          and the temporal question from the previous
+          module, and returns the specific time instant 
+          at which the specified interaction occurs.
+          <br> 
+          (iii) <b>Grounding Object of Interest</b>: The purpose of this module 
+          is to identify the object with which the interaction occurred. This module
+          operates in three steps: (a) The input is sent to a Target
+          Identifier that extracts the class
+          of the intended object that needs to be grounded. (b) A class-
+          based detection returns the bounding box coordinates of all
+          objects belonging to that class in the form of visual options.
+          (c) The Target Identifier then refines the identification process using the 
+          visual options provided in step (b).
+          <br>
+          (iv) <b>Object Tracking</b>: This module tracks the objects till the end of the video 
+          and returns the final location of the object.
         </p>
+
       </div>
       <!-- <div class="columns is-centered is-vcentered", padding-left: 7%;>
         <img src="./static/images/TR_Pipeline.drawio(3).png"
@@ -184,20 +232,50 @@
       <h2 class="title is-3" style="text-align: center;">Curated Dataset</h2>
       <div class="has-text-justified">
         <p>
-          To evaluate the pipeline, we formulated a dataset of 30+ video-instruction pairs (mean length 6 seconds). The dataset consists of a variety of scenarios such as single action - single interaction, single action - multiple interactions, and multiple actions - multiple interactions, with similar and distinct objects in the scene. Some examples of the curated dataset are shown below:
-
+          To assess the robot’s ability
+to perform grounded temporal reasoning, we form an
+evaluation corpus of 155 video-instruction pairs. The data
+set was collected in a table-top setting with a Franka Emika
+Robot Manipulator observing the scene via a eye-in-hand
+RGB-D camera. A total of 15 objects representating
+common household and healthcare items such as cups,
+bottles, medicines, fruits, notebooks, markers, handkerchiefs
+etc. were used. A total of 8 participants performed
+interactions such as pouring, placing, picking, stacking,
+replacing, wiping, dropping, repositioning, swapping etc.
+with 3 − 6 objects in each scene. The human participants
+also provided natural language instructions for the robot
+referencing to interactions and objects in the preceding
+interactions in the workspace. This resulted in a corpus
+of 155 video instruction pairs (each between 6 − 30
+seconds). The instructions and interactions expressed natural
+diversity of spatial and temporal reasoning complexity.
+For detailed analysis, the evaluation corpus is bifurcated
+as: (i) single/multi hop temporal reasoning (56 : 99)
+(ii) simple/complex spatial grounding (98 : 57), (iii)
+single/multiple interactions (62 : 93) and (iv) partial or full
+observation of the referred object in the video (36 : 119),
+see (Fig. 3). 
         </p>
         <br>
       </div>
       <hr>
-      <div class="columns is-multiline" style="justify-content: center;">
+      <div class="columns is-centered is-vcentered" , padding-left: 7%;>
+        <!-- Image Column -->
+        <div>
+          <img src="./static/images/dataset_classification.drawio.png"
+            style="border-radius: 30px; border: 2px solid #555555; background-color: azure; scale: 80%;" />
+        </div>
+        <!-- Text Column -->
+        </div>
+      </div>
+      <!-- <div class="columns is-multiline" style="justify-content: center;">
         <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
           <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
             <img src="static/gif/GIFs/1i1o-place_cloth.gif" alt="GIF 1" style="width: 300px; height: 200px; border-radius: 25px;">
           </figure>
           <h3 class="title is-5" style="text-align: center;">Single Action - Single Interaction - Similar Objects</h3>
-          <!-- <p style="text-align: justify;">Skill network learns to determine the displacement and velocity of a sliding
-            box with given initial velocity at any time queried on a rough plane</p> -->
+
         </div>
         <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
           <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
@@ -205,39 +283,34 @@
               style="width: 300px; height: 200px; border-radius: 25px;">
           </figure>
           <h3 class="title is-5" style="text-align: center;">Single Action - Multiple Interactions - Distinct Objects</h3>
-          <!-- <p style="text-align: justify;">Skill network learns to determine the location and velocity of ball thrown
-            with
-            given initial angle and velocity at any time queried.</p> -->
+
         </div>
         <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
           <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
             <img src="static/gif/GIFs/1a2i1o-pour_cup.gif" alt="GIF 3" style="width: 300px; height: 200px; border-radius: 25px;">
           </figure>
           <h3 class="title is-5" style="text-align: center;">One Action - Multiple Interactions - Similar Objects</h3>
-          <!-- <p style="text-align: justify;">Skill network learns to determine angular position and angular velocity of
-            pendulum at any time queried with given initial angular position.</p> -->
+
         </div>
         
       </div>
-      <!-- Second Row of GIFs -->
+
       <div class="columns is-multiline" style="justify-content: center;">
         <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
           <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
             <img src="static/gif/GIFs/1imo.gif" alt="GIF 4" style="width: 300px; height: 200px; border-radius: 25px;">
           </figure>
           <h3 class="title is-5" style="text-align: center;">Single Action - Single Interaction - Distinct Objects</h3>
-          <!-- <p style="text-align: justify;">Skill network learns to determine velocity of puck just after it gets hit by a
-            swinging pendulum.</p> -->
+
         </div>
         <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
           <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
             <img src="static/gif/GIFs/tmp_reason24.gif" alt="GIF 5" style="width: 300px; height: 200px; border-radius: 25px;">
           </figure>
           <h3 class="title is-5" style="text-align: center;">Multiple Action - Multiple Interaction - Distinct Objects</h3>
-          <!-- <p style="text-align: justify;">Skill network learns to determine velocity of ball just after it bounces a
-            wedge.</p> -->
+
         </div>
-      </div>
+      </div> -->
 
       <!-- <div class="columns is-centered is-vcentered"> -->
         <!-- Text Column -->
@@ -289,25 +362,32 @@
         <Text Column>
         <div class="column has-text-justified">
           <p>
-            <i><b>The following is a video demonstration of our pipeline for the instruction "pick the object that I just placed."</i></b> 
+            <i><b>Demonstration 1: Video showing the robot executing the task for the instruction "pick the object that I just placed."</i></b> <br>
+          
             The robot in scene is a Franka Emika Arm Manipulator. There is a table in front of the robot, on which various objects such as a pair of glasses, a cup, 
             and a small bottle are already kept and the robot is observing this scene with its camera. Then a person comes and places a new object (a banana) on the table. 
-            This is recorded as a stream of frames in robot's camera. Then an instruction "pick the object that I just placed" is given to the robot. 
-            This instruction and the recorded past observations are sent as input in our model. First, the instruction is broken down into a future action for the robot 
-            (in this case "pick up the object") and a declarative part to be sent to LVLM for processing (for e.g "Identify the object that was just placed").
-            After this parsing action (carried out by GPT-4), an initial scene description is given from the first frame of the recorded set of frames (i.e scene before action)(carried out by GPT-4v). 
-            This scene description, alongwith other inputs are sent to LVLM for object interaction recognition. For our case, the LVLM, Video-LLaVA returns "The object that was placed is a banana. It is yellow in colour and is kept in front of the person placing it."
-            Now, as a next step, the object of interest i.e a banana, is extracted from this output by a parser (via GPT4). Once it is identified that the object of interest is a banana, the next step is to ground it.
-            This is done by passing robot's present visuals and the object to be grounded, "banana" , to a semantic phase grounding model (for our case, CogVLM). This gives us a bounding box around the objec of interest and its coordinates.
-            Once grounded, the control component plans motion for the robot and executes the intruction by picking up the banana as can be shown in the video.
+            Then an instruction "pick the object that I just placed" is given to the robot. 
           </p>
         </div> 
         <Image Column>
         <div class="column is-centered">
-          <video id="matting-video" controls playsinline height="100%" style="border-radius: 25px;">
+          <video id="matting-video" controls playsinline height="70%" width="70%" style="border-radius: 25px;">
             <source src="./static/video/video_demo.mp4" type="video/mp4">
           </video> 
-        
+          <div class="column has-text-justified">
+            <p>
+              <i><b>Demonstration 2: Video showing the robot responding to the question "where is the banana?"</i></b> <br>
+              The robot in scene is a Franka Emika Arm Manipulator. There is a table in front of the robot, on which two books,two markers and a bag is placed.
+              The robot is observing this scene with its camera. Then the robot is given the instruction "where is the marker that I just used". 
+              The robot calls the G<sup>2</sup>TR pipeline to identify the object being referred and points
+              to the bag inside which the marker was placed.
+            </p>
+          </div> 
+          <Image Column>
+          <div class="column is-centered">
+            <video id="matting-video" controls playsinline height="70%" width="70%" style="border-radius: 25px;">
+              <source src="./static/video/marker_pointing.mp4" type="video/mp4">
+            </video> 
         </div> 
       </div> 
     </div>  
@@ -318,6 +398,11 @@
       <h2 class="title is-3 has-text-centered">Experimental Insights</h2>
       <div id="tasks" , class="column has-text-justified">
         <p>
+          We have compared the performance of the proposed
+          model G<sup>2</sup>TR with alternative approaches -Direct Temporal Visual Grounding (DTVG) and Refined Temporal Visual Grounding (RTVG).
+           The proposed approach has better performance 
+          than suggested alternate approaches by 26%, in terms
+          of overall average grounding accuracy.
           We compared the state of the art LVLM and LLM models to realize various aspects of the proposed pipeline. We use GPT4 for both the parsing tasks, GPT-4V for initial scene description, Video-LLaVA for object interaction recognition and CogVLM for semantic object grounding. The experimentation of the entire end-to-end pipeline was carried out on a Franka Emika robot manipulator. The robot observes a person placing an object and later successfully executes the instruction, "robot, pick up the object that I just placed". 
           The figure below show the accuracy of instruction following for the scenarios partitioned as those containing identical vs. distinct objects on the scene. The overall success rate was obtained as 45.3%. We observe that LVLMs gave incorrect or ambiguous outputs when all the objects on the scene were identical while higher performance for scenarios with distinct objects. Results indicate the lack of robustness in contemporary LVLMs in identifying complex spatial properties.  
         </p>
@@ -326,30 +411,30 @@
       <div class="columns is-multiline">
         <div class="column is-centered is-half">
           <div class="content">
-            <h3 class="title is-4 has-text-centered">Overall Accuracy</h3>
-            <img src="static/images/pie_chart-1.png" alt="GIF 4" style="width: 500px; height: 300px; border-radius: 25px;">
+            <h3 class="title is-4 has-text-centered">Component-Wise Analysis of Failures</h3>
+            <img src="static/images/component_analysis_v4.drawio.png" alt="GIF 4" style="width: 600px; height: 280px; border-radius: 25px;">
 
             <p class="teaser has-text-justified">
-              Success Rate for Similar and Distinct cases in our dataset</p>
+              Component-Wise Analysis frequency of failure cases generated by each module</p>
           </div>
         </div>
 
         <div class="column is-centered is-half">
           <div class="content">
-            <h3 class="title is-4 has-text-centered">Accuracy of Pipeline (divided on dataset)</h3>
+            <h3 class="title is-4 has-text-centered">Failure Case Examples</h3>
             <!-- <p class="has-text-justified">Robot trains to use pendulum object present in the environment to slide the
               puck to the goal</p> -->
-              <img src="static/images/BarGraph.png" alt="GIF 4" style="width: 500px; height: 315px; border-radius: 25px;">
+              <img src="static/images/failure_cases_v2.drawio.png" alt="GIF 4" style="width: 400px; height: 280px; border-radius: 25px;">
             <!-- <video id="matting-video" controls playsinline height="100%" style="border-radius: 25px;
               <source src="./static/video/slide.mp4" type="video/mp4">
             </video> -->
             <p class="teaser has-text-justified">
-              Success Rate of our Pipeline for our dataset
+              Examples of Failure Cases displays instances of failure within G<sup>2</sup>TR framework.
             </p>
           </div>
         </div>
 
-        <div class="column is-centered is-half">
+        <!-- <div class="column is-centered is-half">
           <div class="content">
             <h3 class="title is-4 has-text-centered">Example - Failure Case 1</h3>
             <p class="has-text-justified">Scenario in which all objects are completely identical and the spatial properties get complex (objects are too close to each-other)</p>
@@ -372,8 +457,8 @@
             <p class="teaser has-text-justified">
               For instruction ”pick the object that was just placed”, VideoLLaVA outputs "The object that was placed was the controller near the person." Hence, the output of our proposed pipeline (via Video-LLAVA) (in red) deviates from the ground truth (in green) resulting in erronous temporal reasoning.
               <These, along with multiple physical skills involved in the task, highlight PhyPlan's adaptability to long-horizon tasks. -->
-            </p>
-          </div>
+            <!-- </p>
+          </div>  -->
           <!-- OUR DEMO START -->
           <!-- <div class="content">
             <h3 class="title is-4 has-text-centered"><span class="dnerf">DQN-Adaptive</span></h3>
@@ -454,12 +539,18 @@
 
   <section class="section">
     <div class="container is-max-desktop">
-      <h2 class="title is-3 has-text-centered">Conclusion and Future Work</h2>
+      <h2 class="title is-3 has-text-centered">Conclusion</h2>
       <div class="column has-text-justified">
         <p>
-          It was found that GPT-4V returns an accurate and detailed description of the initial scene. Combining this with Video-LLaVA's temporal understanding over videos, especially short duration ones, and CogVLM's state-of-the-art grounding abilities, we were able to identify objects of interest with ease. 
-          It was observed that providing the initial scene description facilitates the LVLM in accurately identifying objects that have been manipulated, especially in ambiguous scenarios where there are similar objects in a scene, thereby reducing hallucinating and erroneous object identification. 
-          Further, it was discovered that our choice of semantic object grounding model, CogVLM, performs well even when partially erroneous LVLM outputs. Future work will explore improved prompting strategies such as chain-of-thought as well as feedback from a downstream model to refine predictions of an upstream model. 
+          We present G<sup>2</sup>TR, a novel approach to
+        grounded temporal reasoning. We factorize the problem into
+        three major components: (i) candidate interval localization
+        in a video based on the required interaction, (ii) fine-grained
+        spatial reasoning within the localized interval to ground the
+        target object, and (iii) tracking the object post-interaction.
+        By leveraging pre-trained visual language models and large
+        language models, our approach is zero-shot generalizable
+        for both the object set and interactions. 
         </p>
       </div>
       <hr>
