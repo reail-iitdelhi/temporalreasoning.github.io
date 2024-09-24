@@ -4,9 +4,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-    content="G2TRIF - Generalized Grounded Temporal Reasoning for Robot
-    Instruction Following">
-  <meta name="keywords" content="Temporal Reasoning, Zero-Shot, Robot Instruction Following ">
+    content="G2TR - Generalized Grounded Temporal Reasoning for Robot
+    Instruction Following by Combining Large Pre-trained Models">
+  <meta name="keywords" content="Temporal Reasoning, Grounding, Generalized, Robot Instruction Following, Pre-trained Models ">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Temporal Reasoning</title>
 
@@ -129,7 +129,7 @@
     </h2>
   </div> -->
 
-  <section class="section">
+  <section class="section", style="text-align: center;">
     <div class="container is-max-desktop">
       <!-- Introduction. -->
       <h2 class="title has-text-centered is-3">Introduction</h2>
@@ -138,23 +138,27 @@
           <!-- Robust Robot Instruction Following mandates robots to possess  spatial and temporal reasoning capabilities within their environment. While current methodologies have advanced robots' semantic and spatial comprehension, temporal reasoning remains deficient. In tasks requiring action execution, robots are expected to draw upon past observations to aid humans effectively, necessitating a human-level semantic understanding and memory. This paper highlights the challenge and proposes solutions essential for enhancing robots' ability to recall sequences of actions, crucial for assisting humans in diverse scenarios. Figure 1 exemplifies the expected memory-dependent action sequences.        </p> -->
           Consider the scenario where a human cleans a
           table and a robot observing the scene is instructed with the task
-          “Remove the cloth using which I wiped the table”. This requires
-          the robot to first recognize the need for temporal reasoning
-          about past events. The robot must then identify the relevant
-          past object interaction, ground the object of interest in the
-          present scene, and execute the task according to the human’s
-          instruction. While previous efforts have enabled temporal reasoning in robots, 
-          they typically rely on supervised learning with
-          hand-crafted features. G<sup>2</sup>TR factorizes the grounded temporal
-          reasoning problem as (i) realizing the problem through human-
-          instruction, (ii) reasoning over the past for candidate interval,
-          (iii) spatial reasoning over the interval for grounding, and (iv)
-          reacquiring object post initial-grounding. We propose address-
-          ing this challenge by leveraging the abilities of pre-trained
-          Multimodel Vision-Language Models (LVLMs) To evaluate our
-          framework, we release a robust dataset comprising 155 video-
-          instruction pairs involving temporal, spatial, and linguistic
-          complexity. Our approach has an average accuracy of 70.10%.
+          <i>“Robot, remove the cloth using which I wiped the table”</i>.Instruction
+          following with temporal reasoning requires the robot to identify
+          the <b>relevant</b> past object interaction, <b>ground</b> the object of interest
+          in the present scene, and <b>execute</b> the task according to the
+          human’s instruction. Directly grounding utterances referencing
+          past interactions to grounded objects is challenging due to the
+          <i>multi-hop</i> nature of references to past interactions and large
+          space of object groundings in a video stream observing the
+          robot’s workspace. Our key insight is to factor the temporal
+          reasoning task as <b>(i)</b> estimating the video interval associated
+          with event reference, <b>(ii)</b> performing spatial reasoning over the
+          interaction frames to infer the intended object <b>(iii)</b> semantically
+          tracking the object’s location till the current scene to enable
+          future robot interactions. Our approach leverages existing
+          large pre-trained models (which possess inherent generalization
+          capabilities) and combines them appropriately for temporal
+          grounding tasks. Evaluation on a video-language corpus acquired 
+          with a robot manipulator displaying rich temporal
+          interactions in spatially-complex scenes displays an average
+          accuracy of <b>70.10%</b> indicating the potential of </span>G<sup>2</sup>TR in 
+          robot instruction following.
       </div>
   </section>
 
@@ -165,7 +169,7 @@
         <div class="columns is-centered is-vcentered" , padding-left: 7%;>
           <!-- Image Column -->
           <div>
-            <img src="./static/images/pipeline_diagram_v2.drawio.png"
+            <img src="./static/images/pipeline_diagram_final.png"
               style="border-radius: 30px; border: 2px solid #555555; background-color: azure;" />
           </div>
           <!-- Text Column -->
@@ -183,38 +187,55 @@
       <div class="columns is-centered is-vcentered has-text-justified">
         <p>
           <b>Temporal Reasoning Pipeline:</b><br>
-          Our method factorize the
-          grounded temporal reasoning task as (i) interpreting the
-          language instruction as two distinct components: the past
-          context and the required robot action, (ii) reasoning of a
-          video (or image sequence) over time to localize candidate interval 
-          with requisite interaction (iii) performing fine-grained
-          spatial reasoning on this interval to ground target object (iv)
-          re-acquiring this object post interaction.
+          We address the temporal reasoning task by grounding
+          the requisite interaction in the input-video for the candidate
+          interval extraction, and then pinpointing the intended object
+          through fine-grained spatial reasoning within this interval for
+          grounding. Our framework comprises three components:
+          (1) Temporal-Parser (TP) (2) Candidate interval estimation
+          via Event-Localizer (EL), and (3) Grounding object of inter-
+          est via Target-Detector (TD) followed by object re-acquisition 
+          via semantic tracking
 
           <br><br>
-          (i) <b>Temporal Parsing</b>: The parser formlulates the two key questions:
+          (i) <b>Temporal Parser</b>: The parser formlulates the two key questions:
           a temporal question that determines "when" the described interaction occurs, 
           and an object-identification question that specifiies "what" objects 
-          is involved in the interaction.
+          is involved in the interaction. Additionally, it also
+          extracts the action that the robot needs to perform on
+          the target object (as shown in figure above!). This is accomplished
+          through <i>in-context learning</i> by providing a large language
+          model (LLM) with input instruction. 
           <br>
-          (ii) <b>Event Localization</b>: This modules takes in the entire video 
+          (ii) <b>Event Localization</b>:
+          
+          This module performs temporal reasoning on accrued past
+          observations to identify the likely interval of the required
+          interaction.It takes in the entire video (with requisite object-interaction) 
           and the temporal question from the previous
           module, and returns the specific time instant 
-          at which the specified interaction occurs.
+          at which the specified interaction occured. This is implemented 
+          via a video-understanding vision language model.
           <br> 
-          (iii) <b>Grounding Object of Interest</b>: The purpose of this module 
-          is to identify the object with which the interaction occurred. This module
+          (iii) <b>Grounding Object of Interest</b>: The purpose of this module is to 
+          perform fine-grained
+          spatial reasoning and ground the target-object involved in
+          the interaction. This module
           operates in three steps: (a) The input is sent to a Target
-          Identifier that extracts the class
+          Identifier (essentially an image-understanding vision language model) 
+          that extracts the class
           of the intended object that needs to be grounded. (b) A class-
           based detection returns the bounding box coordinates of all
-          objects belonging to that class in the form of visual options.
-          (c) The Target Identifier then refines the identification process using the 
-          visual options provided in step (b).
+          objects belonging to that class, thus providing visual options.
+          (c) The Target Identifier (VLM) then identifies the target object 
+          by picking the intended target object from these visual options.
           <br>
-          (iv) <b>Object Tracking</b>: This module tracks the objects till the end of the video 
-          and returns the final location of the object.
+          (iv) <b>Grounding Propagation via Semantic Tracking</b>: 
+          This additional module reasons over the grounded object
+          state and location from the time of past interaction till the
+          current world state for future robot manipulation. Again, 
+          a video-understanding vision language model, with tracking 
+          abilities is leveraged for this purpose
         </p>
 
       </div>
@@ -229,7 +250,7 @@
 
   <section class="section">
     <div class="container is-max-desktop">
-      <h2 class="title is-3" style="text-align: center;">Curated Dataset</h2>
+      <h2 class="title is-3" style="text-align: center;">Evaluation Corpus</h2>
       <div class="has-text-justified">
         <p>
           To assess the robot’s ability
@@ -270,6 +291,9 @@ see.
         <!-- Text Column -->
         </div>
       </div>
+
+
+      
       <!-- <div class="columns is-multiline" style="justify-content: center;">
         <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
           <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
@@ -294,9 +318,9 @@ see.
 
         </div>
         
-      </div>
+      </div> -->
 
-      <div class="columns is-multiline" style="justify-content: center;">
+      <!-- <div class="columns is-multiline" style="justify-content: center;">
         <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
           <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
             <img src="static/gif/GIFs/1imo.gif" alt="GIF 4" style="width: 300px; height: 200px; border-radius: 25px;">
@@ -311,7 +335,7 @@ see.
           <h3 class="title is-5" style="text-align: center;">Multiple Action - Multiple Interaction - Distinct Objects</h3>
 
         </div>
-      </div> -->
+      </div> --> 
 
       <!-- <div class="columns is-centered is-vcentered"> -->
         <!-- Text Column -->
@@ -358,12 +382,12 @@ see.
 
   <section class="section">
     <div class="container is-max-desktop">
-      <h2 class="title is-3" style="text-align: center;"> Video Demonstration</h2>
+      <h2 class="title is-3" style="text-align: center;"> Video Demonstrations</h2>
       <div class="columns is-centered is-vcentered"> 
         <Text Column>
         <div class="column has-text-justified">
           <p>
-            <i><b>Demonstration 1: Video showing the robot executing the task for the instruction "pick the object that I just placed."</i></b> <br>
+            <i><b>Demonstration 1: Video showing the robot executing the task for the instruction "Pick the object that I just placed."</i></b> <br>
           
             The robot in scene is a Franka Emika Arm Manipulator. There is a table in front of the robot, on which various objects such as a pair of glasses, a cup, 
             and a small bottle are already kept and the robot is observing this scene with its camera. Then a person comes and places a new object (a banana) on the table. 
@@ -377,9 +401,9 @@ see.
           </video> 
           <div class="column has-text-justified">
             <p>
-              <i><b>Demonstration 2: Video showing the robot responding to the question "where is the banana?"</i></b> <br>
+              <i><b>Demonstration 2: Video showing the robot responding to the question "Robot, where is the marker that I just used?"</i></b> <br>
               The robot in scene is a Franka Emika Arm Manipulator. There is a table in front of the robot, on which two books,two markers and a bag is placed.
-              The robot is observing this scene with its camera. Then the robot is given the instruction "where is the marker that I just used". 
+              The robot is observing this scene with its camera. Then the robot is given the instruction "Where is the marker that I just used". 
               The robot calls the G<sup>2</sup>TR pipeline to identify the object being referred and points
               to the bag inside which the marker was placed.
             </p>
@@ -394,18 +418,79 @@ see.
     </div>  
   </section>>
 
+  <section class="section", style="text-align: center;"></section>
+    <div class="container is-max-desktop">
+      <!-- Alternate Approaches. -->
+      <h2 class="title has-text-centered is-3">Alternate Approaches (Baselines)</h2>
+      <div class="content is-four-fifths has-text-justified">
+        <p>
+          
+        The proposed model, G<sup>2</sup>TR, was compared against two baseline approaches, 
+        each reflecting alternative methods for addressing the temporal reasoning 
+        problem, resulting in different architectures for combining pre-trained models.
+        Only open-set models were included in the evaluation due to their generality.
+        <br><br>    
+        <b>G<sup>2</sup>TR</b>: This model leverages a video-understanding VLM (CogVLM2-video) for candidate 
+        interval identification, followed by target detection and grounding using a Vision 
+        Language Model (GPT-4o) and a Phrase Grounder (GroundingDino1.5-pro). It also integrates 
+        a tracker module (SAM-2) to handle environmental changes.
+
+        <div>
+          <img src="./static/gif/EvalCorpus/G2TR.gif" />
+        </div>
+
+        <br>
+        <b>Direct Temporal Visual Grounding (DTVG)</b>: This approach uses a video-understanding VLM 
+        for both temporal and spatial reasoning, followed by a Phrase Grounder to identify 
+        the intended object, e.g., “green cloth on the left.”
+        <br><br>
+        <div></div>
+          <img src="./static/gif/EvalCorpus/DTVG.gif" />
+        </div>
+
+        
+        <b>Refined Temporal Visual Grounding (RTVG)</b>: Similar to DTVG, this method incorporates 
+        Visual Question Answering (VQA) by the VLM to iteratively refine the object description, 
+        ensuring precise grounding.
+
+        <div></div>
+          <img src="./static/gif/EvalCorpus/RTVG.gif" />
+        </div>
+
+      </div>
+  </section>
+
   <section class="section">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Experimental Insights</h2>
       <div id="tasks" , class="column has-text-justified">
         <p>
           We have compared the performance of the proposed
-          model G<sup>2</sup>TR with alternative approaches -Direct Temporal Visual Grounding (DTVG) and Refined Temporal Visual Grounding (RTVG).
-           The proposed approach has better performance 
-          than suggested alternate approaches by 26%, in terms
-          of overall average grounding accuracy.
-          We compared the state of the art LVLM and LLM models to realize various aspects of the proposed pipeline. We use GPT4 for both the parsing tasks, GPT-4V for initial scene description, Video-LLaVA for object interaction recognition and CogVLM for semantic object grounding. The experimentation of the entire end-to-end pipeline was carried out on a Franka Emika robot manipulator. The robot observes a person placing an object and later successfully executes the instruction, "robot, pick up the object that I just placed". 
-          The figure below show the accuracy of instruction following for the scenarios partitioned as those containing identical vs. distinct objects on the scene. The overall success rate was obtained as 45.3%. We observe that LVLMs gave incorrect or ambiguous outputs when all the objects on the scene were identical while higher performance for scenarios with distinct objects. Results indicate the lack of robustness in contemporary LVLMs in identifying complex spatial properties.  
+          model G<sup>2</sup>TR with alternative approaches 
+          -Direct Temporal Visual Grounding (DTVG) and Refined Temporal Visual Grounding (RTVG).
+          The proposed approach has better performance 
+          than suggested alternate approaches by <b>26%</b>, in terms
+          of <i>overall average grounding accuracy</i>. It also performs better 
+          than the alternate approaches in each of the different scenarios 
+          that are considered in our dataset bifurcation.
+          <br><br>
+          Analysis of our pipeline,G<sup>2</sup>TR , shows that the main bottleneck 
+          is the Event Localizer’s difficulty in precisely identifying the time instant
+          of the language-referenced interaction. The next bottleneck
+          occurs in the Target Detector, which struggles with selection
+          of incorrect object class, insufficient visual prompts, or
+          incorrect selection of object label due to ambiguity in visual
+          options. The Tracker occasionally begins tracking the wrong
+          object, when it appears identical to the correct one. Fig. 7(b).
+          While our approach performs well in complex scenarios,
+          it struggles with rapid human-object interactions and single
+          actions involving multiple objects, such as replacing or
+          stacking. Another limitation of our pipeline is its tendency
+          to perform reasoning based on linguistic cues rather than
+          visual evidence. For instance, when tasked with identifying
+          the object into which water was poured, it may incorrectly
+          output a cup, even if the water was poured into a different
+          container.
         </p>
       </div>
       <hr>
@@ -413,7 +498,7 @@ see.
         <div class="column is-centered is-half">
           <div class="content">
             <h3 class="title is-4 has-text-centered">Component-Wise Analysis of Failures</h3>
-            <img src="static/images/component_analysis_v4.drawio.png" alt="GIF 4" style="width: 600px; height: 280px; border-radius: 25px;">
+            <img src="static/images/failure_cases-Page-1.drawio.png" alt="GIF 4" style="width: 400px; height: 300px; border-radius: 25px;">
 
             <p class="teaser has-text-justified">
               Component-Wise Analysis frequency of failure cases generated by each module</p>
@@ -531,27 +616,71 @@ see.
               challenging to learn for model-free methods, highlighting PhyPlan’s adaptability to long-horizon tasks.
             </p> -->
           <!-- </div> -->
-          <!-- OUR DEMO END-->
+          <!-- OUR DEMO END -->
         </div> 
       </div>
     </div>
     
   </section>
 
+  <section class="section", style="text-align: center;"></section>
+    <div class="container is-max-desktop">
+      <!-- Motivation. -->
+      <h2 class="title has-text-centered is-3"> Questions that might arise</h2>
+      <div class="content is-four-fifths has-text-justified">
+        <p>
+        
+        <b><i>a. Why not just use an image-understanding vision language model?</i></b>
+        <br>
+        Ans –  Interactions are inherently temporal, and videos capture the 
+        full sequence, preserving context and flow. Converting this to the 
+        image domain requires sub-sampling, which is challenging as the appropriate 
+        rate depends on the complexity of the action. This can result in losing 
+        crucial details, making video a more reliable medium for understanding interactions.
+        <br><br>
+        <b><i>b. What is the need for grounding propagation via semantic tracking when the target object was already detected?</i></b>
+        <br>
+        Ans – The relative position of the target object might change after the language-referenced interaction 
+        took place. It is essential that its position be determined in the present world scene of the robot.
+        <br><br>
+        <b><i>c. Why provide visual options for the image-understanding vision language model?</i></b>
+        <br>
+        Ans – Converting the spatial description of target object in linguistic description 
+        might be difficult in visually complex scenarios and confuse the grounding model. 
+        It is therefore relatively easier and more effective to ground the object class first 
+        and then pick the target object from these grounded visual options.
+          
+
+  
+
+      </div>
+  </section>
+
+
   <section class="section">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Conclusion</h2>
       <div class="column has-text-justified">
         <p>
-          We present G<sup>2</sup>TR, a novel approach to
+        We present G<sup>2</sup>TR, a novel approach to
         grounded temporal reasoning. We factorize the problem into
-        three major components: (i) candidate interval localization
-        in a video based on the required interaction, (ii) fine-grained
+        three key components: (i) candidate interval localization
+        in a video based on required interactions, (ii) fine-grained
         spatial reasoning within the localized interval to ground the
         target object, and (iii) tracking the object post-interaction.
         By leveraging pre-trained visual language models and large
-        language models, our approach is zero-shot generalizable
-        for both the object set and interactions. 
+        language models, G<sup>2</sup>TR achieves zero-shot generalization for
+        both object set and interactions. We also propose a dataset
+        of 155 video-instruction pairs covering spatially complex,
+        multi-hop, partially observable, and multi-interaction tempo-
+        ral reasoning tasks. Evaluation on the dataset shows signif-
+        icant improvement over alternative approaches, highlighting
+        G<sup>2</sup>TR’s potential in robot instruction following. Finally, it
+        is important to note that G2TR currently has two limits: (i)
+        it can only process videos up to one minute, as constrained
+        by the video-reasoning model, and (ii) it can ground only
+        a single object at a time. We aim to overcome both these
+        limitations in future.
         </p>
       </div>
       <hr>
