@@ -130,7 +130,7 @@
       <h2 class="title has-text-centered is-3">Introduction</h2>
       <div class="content is-four-fifths has-text-justified">
         <p>
-          <!-- Robust Robot Instruction Following mandates robots to possess  spatial and temporal reasoning capabilities within their environment. While current methodologies have advanced robots' semantic and spatial comprehension, temporal reasoning remains deficient. In tasks requiring action execution, robots are expected to draw upon past observations to aid humans effectively, necessitating a human-level semantic understanding and memory. This paper highlights the challenge and proposes solutions essential for enhancing robots' ability to recall sequences of actions, crucial for assisting humans in diverse scenarios. Figure 1 exemplifies the expected memory-dependent action sequences.        </p> -->
+          
           Consider the scenario where a human cleans a
           table and a robot observing the scene is instructed with the task
           <i>“Robot, remove the cloth using which I wiped the table”</i>.Instruction
@@ -153,7 +153,7 @@
           with a robot manipulator displaying rich temporal
           interactions in spatially-complex scenes displays an average
           accuracy of <b>70.10%</b> indicating the potential of </span>G<sup>2</sup>TR in 
-          robot instruction following.
+          robot instruction following.</p>
       </div>
   </section>
 
@@ -170,13 +170,7 @@
           <!-- Text Column -->
           </div>
         </div>
-        <!-- Subtitle Section -->
-        <!-- <div class="has-text-justified">
-          <h2 class="subtitle">
-            <span class="dnerf">PhyPlan</span> is a novel physics-informed planning framework based on accelerated
-            learning of Physical Reasoning Tasks using Physics Informed Skill Networks
-          </h2>
-        </div> -->
+        
       
 
       <div class="columns is-centered is-vcentered has-text-justified">
@@ -234,10 +228,7 @@
         </p>
 
       </div>
-      <!-- <div class="columns is-centered is-vcentered", padding-left: 7%;>
-        <img src="./static/images/TR_Pipeline.drawio(3).png"
-          style="border-radius: 30px; border: 2px solid #555555; background-color: azure;" />
-      </div> -->
+      
 
     </div>
   </section>
@@ -279,11 +270,7 @@
       </div>
       <hr>
       <div class="columns is-centered is-vcentered" , padding-left: 7%;>
-        <!-- Image Column -->
-        <!--div>
-          <img src="./static/images/dataset_classification.drawio.png"
-            style="border-radius: 30px; border: 2px solid #555555; background-color: azure; scale: 80%;" />
-        </div-->
+       
         <table>
           <tr>
               <th style="text-align: center; font-size: 20px;" colspan="2"><u>Reasoning Complexity</u></th>
@@ -341,7 +328,7 @@
               </td>
           </tr>
         </table>
-        <!-- Text Column -->
+
         </div>
       </div>
     </div>
@@ -417,7 +404,7 @@
 
 <section class="section", style="text-align: center;"></section>
     <div class="container is-max-desktop">
-      <!-- Motivation. -->
+      <!-- Prompts. -->
       <h2 class="title has-text-centered is-3"> Prompting Details</h2>
       <div class="content is-four-fifths has-text-justified">
         <p>
@@ -427,7 +414,10 @@
           effectively and appropriately for the designated tasks, 
           various prompts and prompting strategies were explored, as detailed below.
           <br><br>
-          <b>Temporal Parser</b>: For this parser, an LLM (GPT-4) was employed. 
+          <b>Temporal Parser</b>: For this parser, an LLM 
+          <a href="https://arxiv.org/abs/2303.08774" class="external-link is-normal">[GPT-4]</a> 
+          
+          was employed. 
           The prompt provided a comprehensive background on the robotic setting, 
           along with a few-shot learning approach using in-context examples, 
           enabling it to generate relevant questions for the subsequent modules.
@@ -468,11 +458,14 @@ key, remove the temporal aspect and clues such as 'at 2nd second' or 'last'. Ret
           <br>
           <b>Event Localizer (Candidate Interval Extraction): </b>
           This module utilizes the temporal reasoning capabilities of the video-understanding VLM 
-          (CogVLM2-video), with the <b>temporal question</b> from the temporal parser serving as the prompt.
+          <a href="https://arxiv.org/abs/2408.16500" class="external-link is-normal">[CogVLM2-video]</a>, 
+                with the <b>temporal question</b> from the temporal parser serving as the prompt.
           <br><br>
           <b>Grounding object of interest: </b>
           This module employs the spatial reasoning and image understanding features of VLMs 
-          (GPT-4o) along with the grounding capabilities of Phrase Grounding models (GroundingDino1.5-pro), 
+          <a href="https://arxiv.org/abs/2303.08774" class="external-link is-normal">[GPT-4]</a> 
+          along with the grounding capabilities of Phrase Grounding models
+          <a href="https://arxiv.org/abs/2405.10300" class="external-link is-normal">[Grounding DINO 1.5 Pro]</a> , 
           using the <b>object-interaction </b>from the temporal parser as the initial prompt.
           <br>
           <pre><code>
@@ -499,7 +492,7 @@ visual options. Pick the right object number with which the INTERACTION is happe
           <pre><code>
 "Where did the <i>marker</i> go? Give the object that partially or completely hid the <i>marker</i>." 
 
-And once the marker goes out of view and the occluding object is determined to be a book:
+## And once the marker goes out of view and the occluding object is determined to be a book:
 
 "Where did the <i>book</i> go? Give the object that partially or completely hid the <i>book</i>."
           </code></pre>
@@ -525,10 +518,16 @@ And once the marker goes out of view and the occluding object is determined to b
         problem, resulting in different architectures for combining pre-trained models.
         Only open-set models were included in the evaluation due to their generality.
         <br><br>    
-        <b>G<sup>2</sup>TR</b>: This model leverages a video-understanding VLM (CogVLM2-video) for candidate 
+        <b>G<sup>2</sup>TR</b>: This model leverages a video-understanding VLM 
+        <a href="https://arxiv.org/abs/2408.16500" class="external-link is-normal">[CogVLM2-video]</a>
+        for candidate 
         interval identification, followed by target detection and grounding using a Vision 
-        Language Model (GPT-4o) and a Phrase Grounder (GroundingDino1.5-pro). It also integrates 
-        a tracker module (SAM-2) to handle environmental changes.
+        Language Model <a href="https://arxiv.org/abs/2303.08774" class="external-link is-normal">[GPT-4]</a> 
+         and a Phrase Grounder 
+         <a href="https://arxiv.org/abs/2405.10300" class="external-link is-normal">[Grounding DINO 1.5 Pro]</a>
+         . It also integrates 
+        a tracker module <a href="https://arxiv.org/abs/2408.00714" class="external-link is-normal">[SAM 2]</a>
+         to handle environmental changes.
 
         <div>
           <img src="./static/gif/EvalCorpus/G2TR.gif" />
@@ -641,11 +640,7 @@ And once the marker goes out of view and the occluding object is determined to b
                       <p style="text-align: center;"><b>(d) Incorrect Object Tracking</b><br> (Wrong cup tracked)</p>
                     </figure>
                 </div>
-                <!-- <div class="column">
-                    <figure>
-                      <img src="static/images/failure_case_3.png" alt="Image 5 Description" style="width:100%;">
-                    </figure>
-                </div> -->
+                
                 <div class="column">
                     <figure>
                       <figcaption style="text-align: center; margin-bottom: 10px;font-size: 15px;"><i><b>Instruction: </b>Robot, point to the cup which<br> was just used by the person</i></figcaption>
@@ -659,9 +654,7 @@ And once the marker goes out of view and the occluding object is determined to b
                 
               
               
-            <!-- <video id="matting-video" controls playsinline height="100%" style="border-radius: 25px;
-              <source src="./static/video/slide.mp4" type="video/mp4">
-            </video> -->
+            
             <div class="is-flex is-justify-content-center">
               <p class="teaser has-text-justified" style="max-width: 600px;">
                 Examples of Failure Cases displays instances of failure within G<sup>2</sup>TR framework.
@@ -670,103 +663,6 @@ And once the marker goes out of view and the occluding object is determined to b
           </div>
         </div>
 
-        <!-- <div class="column is-centered is-half">
-          <div class="content">
-            <h3 class="title is-4 has-text-centered">Example - Failure Case 1</h3>
-            <p class="has-text-justified">Scenario in which all objects are completely identical and the spatial properties get complex (objects are too close to each-other)</p>
-            
-              <img src="static/images/Untitled Diagram.drawio.png" alt="GIF 4" style="width: 500px; height: 315px; border-radius: 25px;">
-            
-            <p class="teaser has-text-justified">
-              For instruction ”pick the object that was just placed”, VideoLLaVA outputs "The object that was placed was the cup in the center". Hence, the output of our proposed pipeline (via Video-LLAVA) (in red) deviates from the ground truth (in green) resulting in erronous temporal reasoning.
-            </p>
-          </div>
-        </div> 
-
-        <div class="column is-centered is-half">
-          <div class="content">
-            <h3 class="title is-4 has-text-centered">Example - Failure Case 2</h3>
-            <p class="has-text-justified"> Scenario in which two identical objects are placed among other distinct objects.</p>
-            
-              <img src="static/images/amb2.drawio.png" alt="GIF 4" style="width: 500px; height: 315px; border-radius: 25px;">
-            </video>
-            <p class="teaser has-text-justified">
-              For instruction ”pick the object that was just placed”, VideoLLaVA outputs "The object that was placed was the controller near the person." Hence, the output of our proposed pipeline (via Video-LLAVA) (in red) deviates from the ground truth (in green) resulting in erronous temporal reasoning.
-              <These, along with multiple physical skills involved in the task, highlight PhyPlan's adaptability to long-horizon tasks. -->
-            <!-- </p>
-          </div>  -->
-          <!-- OUR DEMO START -->
-          <!-- <div class="content">
-            <h3 class="title is-4 has-text-centered"><span class="dnerf">DQN-Adaptive</span></h3>
-            <div class="columns is-centered is-vcentered">
-              <!-- Image Column -->
-              <!-- <div class="column is-one-third">
-                <img src="./static/images/bridge_dqn-comp/DQN-1.png" width="400" height="300"
-                  style="border-radius: 25px;" />
-                <p class="teaser has-text-centered">
-                  <span class="dnerf">DQN-Adaptive</span>: Action 1
-                </p>
-              </div>
-              <div class="column is-one-third">
-                <img src="./static/images/bridge_dqn-comp/DQN-4.png" width="400" height="300"
-                  style="border-radius: 25px;" />
-                <p class="teaser has-text-centered">
-                  <span class="dnerf">DQN-Adaptive</span>: Action 4
-                </p>
-              </div>
-              <div class="column is-one-third">
-                <img src="./static/images/bridge_dqn-comp/DQN-11.png" width="400" height="300"
-                  style="border-radius: 25px;" />
-                <p class="teaser has-text-centered">
-                  <span class="dnerf">DQN-Adaptive</span>: Action 11
-                </p>
-              </div>
-            </div>
-            <!-- Subtitle Section -->
-            <!-- <p class="teaser has-text-justified">
-              <span class="dnerf">DQN-Adaptive</span> (Baseline) executes actions in sequence while learning the difference
-              in the predicted reward for an action and the actual reward. However, it does not use the bridge even after 11
-              attempts which is needed to land the ball further closer to the goal.
-            </p>
-          </div> --> 
-          <!-- <div class="content">
-            <h3 class="title is-4 has-text-centered"><span class="dnerf">PhyPlan</span></h3>
-            <div class="columns is-centered is-vcentered">
-              <!-- Image Column -->
-              <!-- <div class="column is-one-third">
-                <img src="./static/images/bridge_dqn-comp/Phyplan_1.png" width="400" height="300"
-                  style="border-radius: 25px;" />
-                <p class="teaser has-text-centered">
-                  <span class="dnerf">PhyPlan</span>: Action 1
-                </p>
-              </div>
-              <div class="column is-one-third">
-                <img src="./static/images/bridge_dqn-comp/Phyplan_2.png" width="400" height="300"
-                  style="border-radius: 25px;" />
-                <p class="teaser has-text-centered">
-                  <span class="dnerf">PhyPlan</span>: Action 2
-                </p>
-              </div>
-              <div class="column is-one-third">
-                <img src="./static/images/bridge_dqn-comp/Phyplan_4.png" width="400" height="300"
-                  style="border-radius: 25px;" />
-                <p class="teaser has-text-centered">
-                  <span class="dnerf">PhyPlan</span>: Action 4
-                </p>
-              </div>
-            </div> --> 
-            <!-- Subtitle Section -->
-            <!-- <p class="teaser has-text-justified">
-              <span class="dnerf">PhyPlan</span> executes actions in sequence while learning the difference in the predicted
-              reward for an action and the actual reward. It does not use the bridge in the first attempt because
-              of errors in prediction. However, it quickly realises the need of the bridge in the second attempt. Further,
-              it chooses appropriate actions to land the ball in the goal in just the fourth attempt. Note that the robot
-              learns to use the bridge effectively; a physical reasoning task reported earlier <a
-                href="https://arxiv.org/abs/1907.09620" class="external-link is-normal">[Allen et al., 2020]</a> to be
-              challenging to learn for model-free methods, highlighting PhyPlan’s adaptability to long-horizon tasks.
-            </p> -->
-          <!-- </div> -->
-          <!-- OUR DEMO END -->
         </div> 
       </div>
     </div>
@@ -841,17 +737,30 @@ And once the marker goes out of view and the occluding object is determined to b
 
   <hr>
 
-  <!-- <section class="section" id="References">
+  <section class="section" id="References">
     <div class="container is-max-desktop content">
       <h2 class="title">References</h2>
-      <pre><code>1. [Allen et al., 2020] Kelsey R Allen, Kevin A Smith, and Joshua B Tenenbaum.
-        Rapid trial-and-error learning with simulation supports flexible tool use and physical reasoning.
-        Proceedings of the National Academy of Sciences, 117(47):29302–29310, 2020.</code></pre>
-      <pre><code>2. [Bakhtin et al., 2019] Anton Bakhtin, Laurens van der Maaten, Justin Johnson, Laura Gustafson, and Ross Girshick.
-        Phyre: A new benchmark for physical reasoning.
-        Advances in Neural Information Processing Systems, 32,484 2019.</code></pre>
+      <pre><code>1. [CogVLM2-video] Hong, Wenyi and Wang, Weihan and Ding, Ming and Yu, Wenmeng and Lv, Qingsong and Wang, 
+        Yan and Cheng, Yean and Huang, Shiyu and Ji, Junhui and Xue, Zhao and others
+        CogVLM2: Visual Language Models for Image and Video Understanding
+        arXiv preprint arXiv:2408.16500, 2024.</code></pre>
+      <pre><code>2. [GPT-4] Achiam, Josh and Adler, Steven and Agarwal, Sandhini and Ahmad, Lama and Akkaya, Ilge and Aleman, 
+        Florencia Leoni and Almeida, Diogo and Altenschmidt, Janko and Altman, Sam and Anadkat, Shyamal and others.
+        Gpt-4 technical report
+        arXiv preprint arXiv:2303.08774, 2023.</code></pre>
+      <pre><code>3. [Grounding DINO 1.5 Pro] Tianhe Ren and Qing Jiang and Shilong Liu and Zhaoyang Zeng and Wenlong Liu 
+        and Han Gao and Hongjie Huang and Zhengyu Ma and Xiaoke Jiang and Yihao Chen and Yuda Xiong and Hao Zhang  
+        and Feng Li and Peijun Tang and Kent Yu and Lei Zhang.
+        Grounding DINO 1.5: Advance the "Edge" of Open-Set Object Detection
+        arXiv preprint arXiv:2405.10300v2, 2024.</code></pre>
+      <pre><code>4. [SAM 2] Ravi, Nikhila and Gabeur, Valentin and Hu, Yuan-Ting and Hu, Ronghang and Ryali, Chaitanya and 
+        Ma, Tengyu and Khedr, Haitham and R{\"a}dle, Roman and Rolland, Chloe and Gustafson, Laura and Mintun, 
+        Eric and Pan, Junting and Alwala, Kalyan Vasudev and Carion, Nicolas and Wu, Chao-Yuan and Girshick, 
+        Ross and Doll{\'a}r, Piotr and Feichtenhofer, Christoph
+        SAM 2: Segment Anything in Images and Videos
+        arXiv preprint arXiv:2408.00714, 2024.</code></pre>
     </div>
-  </section> -->
+  </section>
 
   <!-- <section class="section" id="BibTeX">
     <div class="container is-max-desktop content">
