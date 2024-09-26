@@ -4,11 +4,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-    content="G2TRIF - Generalized Grounded Temporal Reasoning for Robot
-    Instruction Following">
-  <meta name="keywords" content="Temporal Reasoning, Zero-Shot, Robot Instruction Following ">
+    content="G2TR - Generalized Grounded Temporal Reasoning for Robot
+    Instruction Following by Combining Large Pre-trained Models">
+  <meta name="keywords" content="Temporal Reasoning, Grounding, Generalized, Robot Instruction Following, Pre-trained Models ">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Temporal Reasoning</title>
+  <title>Generalized Grounded Temporal Reasoning</title>
+
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
 
@@ -24,6 +25,7 @@
   <script src="./static/js/bulma-carousel.min.js"></script>
   <script src="./static/js/bulma-slider.min.js"></script>
   <script src="./static/js/index.js"></script>
+  
 </head>
 
 <body>
@@ -129,7 +131,7 @@
     </h2>
   </div> -->
 
-  <section class="section">
+  <section class="section", style="text-align: center;">
     <div class="container is-max-desktop">
       <!-- Introduction. -->
       <h2 class="title has-text-centered is-3">Introduction</h2>
@@ -138,23 +140,27 @@
           <!-- Robust Robot Instruction Following mandates robots to possess  spatial and temporal reasoning capabilities within their environment. While current methodologies have advanced robots' semantic and spatial comprehension, temporal reasoning remains deficient. In tasks requiring action execution, robots are expected to draw upon past observations to aid humans effectively, necessitating a human-level semantic understanding and memory. This paper highlights the challenge and proposes solutions essential for enhancing robots' ability to recall sequences of actions, crucial for assisting humans in diverse scenarios. Figure 1 exemplifies the expected memory-dependent action sequences.        </p> -->
           Consider the scenario where a human cleans a
           table and a robot observing the scene is instructed with the task
-          “Remove the cloth using which I wiped the table”. This requires
-          the robot to first recognize the need for temporal reasoning
-          about past events. The robot must then identify the relevant
-          past object interaction, ground the object of interest in the
-          present scene, and execute the task according to the human’s
-          instruction. While previous efforts have enabled temporal reasoning in robots, 
-          they typically rely on supervised learning with
-          hand-crafted features. G<sup>2</sup>TR factorizes the grounded temporal
-          reasoning problem as (i) realizing the problem through human-
-          instruction, (ii) reasoning over the past for candidate interval,
-          (iii) spatial reasoning over the interval for grounding, and (iv)
-          reacquiring object post initial-grounding. We propose address-
-          ing this challenge by leveraging the abilities of pre-trained
-          Multimodel Vision-Language Models (LVLMs) To evaluate our
-          framework, we release a robust dataset comprising 155 video-
-          instruction pairs involving temporal, spatial, and linguistic
-          complexity. Our approach has an average accuracy of 70.10%.
+          <i>“Robot, remove the cloth using which I wiped the table”</i>.Instruction
+          following with temporal reasoning requires the robot to identify
+          the <b>relevant</b> past object interaction, <b>ground</b> the object of interest
+          in the present scene, and <b>execute</b> the task according to the
+          human’s instruction. Directly grounding utterances referencing
+          past interactions to grounded objects is challenging due to the
+          <i>multi-hop</i> nature of references to past interactions and large
+          space of object groundings in a video stream observing the
+          robot’s workspace. Our key insight is to factor the temporal
+          reasoning task as <b>(i)</b> estimating the video interval associated
+          with event reference, <b>(ii)</b> performing spatial reasoning over the
+          interaction frames to infer the intended object <b>(iii)</b> semantically
+          tracking the object’s location till the current scene to enable
+          future robot interactions. Our approach leverages existing
+          large pre-trained models (which possess inherent generalization
+          capabilities) and combines them appropriately for temporal
+          grounding tasks. Evaluation on a video-language corpus acquired 
+          with a robot manipulator displaying rich temporal
+          interactions in spatially-complex scenes displays an average
+          accuracy of <b>70.10%</b> indicating the potential of </span>G<sup>2</sup>TR in 
+          robot instruction following.
       </div>
   </section>
 
@@ -165,8 +171,8 @@
         <div class="columns is-centered is-vcentered" , padding-left: 7%;>
           <!-- Image Column -->
           <div>
-            <img src="./static/images/pipeline_diagram_v2.drawio.png"
-              style="border-radius: 30px; border: 2px solid #555555; background-color: azure;" />
+            <img src="./static/gif/EvalCorpus/tech_overview.gif"
+              style="width:1000px ; border-radius: 30px; border: 2px solid #555555; background-color: azure;" />
           </div>
           <!-- Text Column -->
           </div>
@@ -182,39 +188,56 @@
 
       <div class="columns is-centered is-vcentered has-text-justified">
         <p>
-          <b>Temporal Reasoning Pipeline:</b><br>
-          Our method factorize the
-          grounded temporal reasoning task as (i) interpreting the
-          language instruction as two distinct components: the past
-          context and the required robot action, (ii) reasoning of a
-          video (or image sequence) over time to localize candidate interval 
-          with requisite interaction (iii) performing fine-grained
-          spatial reasoning on this interval to ground target object (iv)
-          re-acquiring this object post interaction.
+          <b>Generalized Grounded Temporal Reasoning (</span>G<sup>2</sup>TR) Pipeline:</b><br>
+          We address the temporal reasoning task by grounding
+          the requisite interaction in the input-video for the candidate
+          interval extraction, and then pinpointing the intended object
+          through fine-grained spatial reasoning within this interval for
+          grounding. Our framework comprises three components:
+          (1) Temporal-Parser (TP) (2) Candidate interval estimation
+          via Event-Localizer (EL), and (3) Grounding object of inter-
+          est via Target-Detector (TD) followed by object re-acquisition 
+          via semantic tracking
 
           <br><br>
-          (i) <b>Temporal Parsing</b>: The parser formlulates the two key questions:
+          (i) <b>Temporal Parser</b>: The parser formlulates the two key questions:
           a temporal question that determines "when" the described interaction occurs, 
           and an object-identification question that specifiies "what" objects 
-          is involved in the interaction.
+          is involved in the interaction. Additionally, it also
+          extracts the action that the robot needs to perform on
+          the target object (as shown in figure above!). This is accomplished
+          through <i>in-context learning</i> by providing a large language
+          model (LLM) with input instruction. 
           <br>
-          (ii) <b>Event Localization</b>: This modules takes in the entire video 
+          (ii) <b>Event Localization</b>:
+          
+          This module performs temporal reasoning on accrued past
+          observations to identify the likely interval of the required
+          interaction.It takes in the entire video (with requisite object-interaction) 
           and the temporal question from the previous
           module, and returns the specific time instant 
-          at which the specified interaction occurs.
+          at which the specified interaction occured. This is implemented 
+          via a video-understanding vision language model.
           <br> 
-          (iii) <b>Grounding Object of Interest</b>: The purpose of this module 
-          is to identify the object with which the interaction occurred. This module
+          (iii) <b>Grounding Object of Interest</b>: The purpose of this module is to 
+          perform fine-grained
+          spatial reasoning and ground the target-object involved in
+          the interaction. This module
           operates in three steps: (a) The input is sent to a Target
-          Identifier that extracts the class
+          Identifier (essentially an image-understanding vision language model) 
+          that extracts the class
           of the intended object that needs to be grounded. (b) A class-
           based detection returns the bounding box coordinates of all
-          objects belonging to that class in the form of visual options.
-          (c) The Target Identifier then refines the identification process using the 
-          visual options provided in step (b).
+          objects belonging to that class, thus providing visual options.
+          (c) The Target Identifier (VLM) then identifies the target object 
+          by picking the intended target object from these visual options.
           <br>
-          (iv) <b>Object Tracking</b>: This module tracks the objects till the end of the video 
-          and returns the final location of the object.
+          (iv) <b>Grounding Propagation via Semantic Tracking</b>: 
+          This additional module reasons over the grounded object
+          state and location from the time of past interaction till the
+          current world state for future robot manipulation. Again, 
+          a video-understanding vision language model, with tracking 
+          abilities is leveraged for this purpose
         </p>
 
       </div>
@@ -229,33 +252,34 @@
 
   <section class="section">
     <div class="container is-max-desktop">
-      <h2 class="title is-3" style="text-align: center;">Curated Dataset</h2>
+      <h2 class="title is-3" style="text-align: center;">Evaluation Corpus</h2>
       <div class="has-text-justified">
         <p>
           To assess the robot’s ability
-to perform grounded temporal reasoning, we form an
-evaluation corpus of 155 video-instruction pairs. The data
-set was collected in a table-top setting with a Franka Emika
-Robot Manipulator observing the scene via a eye-in-hand
-RGB-D camera. A total of 15 objects representating
-common household and healthcare items such as cups,
-bottles, medicines, fruits, notebooks, markers, handkerchiefs
-etc. were used. A total of 8 participants performed
-interactions such as pouring, placing, picking, stacking,
-replacing, wiping, dropping, repositioning, swapping etc.
-with 3 − 6 objects in each scene. The human participants
-also provided natural language instructions for the robot
-referencing to interactions and objects in the preceding
-interactions in the workspace. This resulted in a corpus
-of 155 video instruction pairs (each between 6 − 30
-seconds). The instructions and interactions expressed natural
-diversity of spatial and temporal reasoning complexity.
-For detailed analysis, the evaluation corpus is bifurcated
-as: (i) single/multi hop temporal reasoning (56 : 99)
-(ii) simple/complex spatial grounding (98 : 57), (iii)
-single/multiple interactions (62 : 93) and (iv) partial or full
-observation of the referred object in the video (36 : 119),
-see.
+          to perform grounded temporal reasoning, we form an
+          evaluation corpus of <b>155 video-instruction pairs</b>. The data
+          set was collected in a table-top setting with a Franka Emika
+          Robot Manipulator observing the scene via a eye-in-hand
+          RGB-D camera. A total of 15 objects representating
+          common household and healthcare items such as cups,
+          bottles, medicines, fruits, notebooks, markers, handkerchiefs
+          etc. were used. A total of 8 participants performed
+          interactions such as pouring, placing, picking, stacking,
+          replacing, wiping, dropping, repositioning, swapping etc.
+          with 3 − 6 objects in each scene. The human participants
+          also provided natural language instructions for the robot
+          referencing to interactions and objects in the preceding
+          interactions in the workspace. This resulted in a corpus
+          of 155 video instruction pairs (each between 6 − 30
+          seconds). The instructions and interactions expressed natural
+          diversity of spatial and temporal reasoning complexity.
+          For detailed analysis, the evaluation corpus is bifurcated
+          as: 
+          <b>(i) single/multi hop</b> temporal reasoning (56 : 99)
+          <b>(ii) simple/complex spatial</b> grounding (98 : 57), <b>(iii)
+            single/multiple interactions</b> (62 : 93) and <b>(iv) partial or full
+              observation</b> of the referred object (36 : 119)
+        
 
         </p>
         <br>
@@ -263,136 +287,280 @@ see.
       <hr>
       <div class="columns is-centered is-vcentered" , padding-left: 7%;>
         <!-- Image Column -->
-        <div>
+        <!--div>
           <img src="./static/images/dataset_classification.drawio.png"
             style="border-radius: 30px; border: 2px solid #555555; background-color: azure; scale: 80%;" />
-        </div>
+        </div-->
+        <table>
+          <tr>
+              <th style="text-align: center; font-size: 20px;" colspan="2"><u>Reasoning Complexity</u></th>
+              <th style="text-align: center; font-size: 20px;" colspan="2"><u>Interaction Complexity</u></th>
+          </tr>
+          <tr>
+              <td 
+              style="text-align: center;">
+                  <strong>Single Hop</strong><br>
+                  <i><b>Instruction: </b>Robot, pick the cloth that I just dropped!</i><br>
+                  <img src="static/gif/EvalCorpus/single_hop.gif" style="width: 200px; height: 150px;">
+              </td>
+              <td style="text-align: center;">
+                  <strong>Multi Hop</strong><br>
+                  <i><b>Instruction: </b>Robot, give me <br>the object placed second!</i><br>
+                  <img src="static/gif/EvalCorpus/multi_hop.gif" style="width: 200px; height: 150px;">
+              </td>
+              <td style="text-align: center;">
+                  <strong>Single Interaction</strong><br>
+                  <i><b>Instruction: </b>Robot, give the cloth that was just placed!</i><br>
+                  <img src="static/gif/EvalCorpus/single_interaction.gif" style="width: 200px; height: 150px;">
+              </td>
+              <td style="text-align: center;">
+                  <strong>Multi Interaction</strong><br>
+                  <i><b>Instruction: </b>Robot, pick cup in which water was poured by orange bottle!</i><br>
+                  <img src="static/gif/EvalCorpus/multi_interaction.gif" style="width: 200px; height: 150px;">
+              </td>
+          </tr>
+      
+          <tr>
+              <th style="text-align: center; font-size: 20px;"  colspan="2"><u>Spatial/Visual Complexity</u></th>
+              <th style="text-align: center; font-size: 20px;" colspan="2"><u>Observability</u></th>
+          </tr>
+          
+          <tr>
+              <td style="text-align: center;">
+                  <strong>Spatially Simple</strong><br>
+                  <i><b>Instruction: </b>Robot, remove the cloth used for wiping!</i><br>
+                  <img src="static/gif/EvalCorpus/spatially_simple.gif" style="width: 200px; height: 150px;">
+              </td>
+              <td style="text-align: center;">
+                  <strong>Spatially Complex</strong><br>
+                  <i><b>Instruction: </b>Robot, point to the cup which was just placed on the table</i><br>
+                  <img src="static/gif/EvalCorpus/spatially_complex.gif" style="width: 200px; height: 150px;">
+              </td>
+              <td style="text-align: center;">
+                  <strong>Completely Observable</strong><br>
+                  <i><b>Instruction: </b>Robot, pick the object that was just placed!</i><br>
+                  <img src="static/gif/EvalCorpus/completely_obs.gif" style="width: 200px; height: 150px;">
+              </td>
+              <td style="text-align: center;">
+                  <strong>Partially Observable</strong><br>
+                  <i><b>Instruction: </b>Robot, where <br>is the medicine?</i><br>
+                  <img src="static/gif/EvalCorpus/partially_obs.gif" style="width: 200px; height: 150px;">
+              </td>
+          </tr>
+        </table>
         <!-- Text Column -->
         </div>
       </div>
-      <!-- <div class="columns is-multiline" style="justify-content: center;">
-        <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
-          <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
-            <img src="static/gif/GIFs/1i1o-place_cloth.gif" alt="GIF 1" style="width: 300px; height: 200px; border-radius: 25px;">
-          </figure>
-          <h3 class="title is-5" style="text-align: center;">Single Action - Single Interaction - Similar Objects</h3>
-
-        </div>
-        <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
-          <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
-            <img src="static/gif/GIFs/1imo-place.gif" alt="GIF 2"
-              style="width: 300px; height: 200px; border-radius: 25px;">
-          </figure>
-          <h3 class="title is-5" style="text-align: center;">Single Action - Multiple Interactions - Distinct Objects</h3>
-
-        </div>
-        <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
-          <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
-            <img src="static/gif/GIFs/1a2i1o-pour_cup.gif" alt="GIF 3" style="width: 300px; height: 200px; border-radius: 25px;">
-          </figure>
-          <h3 class="title is-5" style="text-align: center;">One Action - Multiple Interactions - Similar Objects</h3>
-
-        </div>
-        
-      </div>
-
-      <div class="columns is-multiline" style="justify-content: center;">
-        <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
-          <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
-            <img src="static/gif/GIFs/1imo.gif" alt="GIF 4" style="width: 300px; height: 200px; border-radius: 25px;">
-          </figure>
-          <h3 class="title is-5" style="text-align: center;">Single Action - Single Interaction - Distinct Objects</h3>
-
-        </div>
-        <div class="column is-one-third" style="display: flex; flex-direction: column; align-items: center;">
-          <figure class="image" style="display: flex; justify-content: center; align-items: center; margin: auto;">
-            <img src="static/gif/GIFs/tmp_reason24.gif" alt="GIF 5" style="width: 300px; height: 200px; border-radius: 25px;">
-          </figure>
-          <h3 class="title is-5" style="text-align: center;">Multiple Action - Multiple Interaction - Distinct Objects</h3>
-
-        </div>
-      </div> -->
-
-      <!-- <div class="columns is-centered is-vcentered"> -->
-        <!-- Text Column -->
-        <!-- <div class="column is-half has-text-justified">
-          <p>
-            <i><b>The skill learning model is based on a neural network that predicts the object's state during dynamic
-                interaction continuously parameterised by time.</i></b> The figure on the side shows the predicted
-            positions of the ball plotted against time in the Bounce Task. Such interactions can be simulated in a
-            physics engine by using
-            numerical integration schemes.
-            However, since we aim to perform multi-step interactions, simulating outcomes during training is often
-            intractable. Hence, we adopt a learning-based approach and learn a function which predicts the object's
-            state during dynamic interaction continuously parameterised by time.
-            For certain skills like swining, sliding and throwing we levarage the known governing physics equations and
-            employ a physics-informed loss function in neural network to constrain the latent space, these are called as
-            Physics-Informed Skill Networks.
-            However, skills like bouncing and hitting are learnt directly from data because of complex and intractable
-            physics.
-          </p>
-        </div> -->
-        <!-- Image Column -->
-        <!-- <div class="column is-half">
-          <img src="./static/images/bounce_chain_0.5.png" width="1499" height="976"
-            style="border-radius: 25px; border: 2px solid #000000;" />
-        </div> -->
-      <!-- </div> -->
-      <!-- <div class="has-text-justified">
-        <p>
-          The skill learning model is based on a neural network that predicts the object's state during dynamic
-          interaction continuously parameterised by time. Such interactions can be simulated in a physics engine by
-          using numerical integration schemes.
-          However, since we aim to perform multi-step interactions, simulating outcomes during training is often
-          intractable. Hence, we adopt a learning-based approach and learn a function which predicts the object's
-          state during dynamic interaction continuously parameterised by time.
-          For certain skills like swining, sliding and throwing we levarage the known governing physics equations and
-          employ a physics-informed loss function in neural network to constrain the latent space, these are called as
-          Physics-Informed Skill Networks.
-          However, skills like bouncing and hitting are learnt directly from data because of complex and intractable
-          physics.
-        </p>
-      </div> -->
     </div>
   </section>
-  <!-- Test comment -->
+
   <section class="section">
     <div class="container is-max-desktop">
-      <h2 class="title is-3" style="text-align: center;"> Video Demonstration</h2>
-      <div class="columns is-centered is-vcentered"> 
-        <Text Column>
-        <div class="column has-text-justified">
-          <p>
-            <i><b>Demonstration 1: Video showing the robot executing the task for the instruction "pick the object that I just placed."</i></b> <br>
-          
-            The robot in scene is a Franka Emika Arm Manipulator. There is a table in front of the robot, on which various objects such as a pair of glasses, a cup, 
-            and a small bottle are already kept and the robot is observing this scene with its camera. Then a person comes and places a new object (a banana) on the table. 
-            Then an instruction "pick the object that I just placed" is given to the robot. 
-          </p>
-        </div> 
-        <Image Column>
-        <div class="column is-centered">
-          <video id="matting-video" controls playsinline height="70%" width="70%" style="border-radius: 25px;">
-            <source src="./static/video/video_demo.mp4" type="video/mp4">
-          </video> 
-          <div class="column has-text-justified">
-            <p>
-              <i><b>Demonstration 2: Video showing the robot responding to the question "where is the banana?"</i></b> <br>
-              The robot in scene is a Franka Emika Arm Manipulator. There is a table in front of the robot, on which two books,two markers and a bag is placed.
-              The robot is observing this scene with its camera. Then the robot is given the instruction "where is the marker that I just used". 
-              The robot calls the G<sup>2</sup>TR pipeline to identify the object being referred and points
-              to the bag inside which the marker was placed.
-            </p>
-          </div> 
-          <Image Column>
-          <div class="column is-centered">
-            <video id="matting-video" controls playsinline height="70%" width="70%" style="border-radius: 25px;">
-              <source src="./static/video/marker_pointing.mp4" type="video/mp4">
+        <h2 class="title is-3" style="text-align: center;">Video Demonstrations</h2>
+        <div class="columns is-multiline">
+            
+            <!-- Row 1: Text and Video for Demo 1 -->
+            <div class="column is-half">
+                <p>
+                    <i><b><u>Demonstration 1 - A Simple Scenario</u>: Video showing the robot executing the instruction "Pick the object that I just placed."</b></i> <br>
+                    The robot in scene is a Franka Emika Arm Manipulator. There is a table in front of the robot, on which various objects (glasses, a cup, 
+                    a small bottle) are already kept and the robot is observing this scene with its camera. Then a person places a banana on the  table and an instruction to pick the object that was just placed is given, which the robot executes.
+
+                    
+                </p>
+                <br>
+                <video id="matting-video" controls playsinline height="100%" width="100%" style="border-radius: 25px;">
+                  <source src="./static/video/DemoVideo1.mp4" type="video/mp4">
+              </video> 
+            </div>
+            
+
+            <!-- Row 2: Text and Video for Demo 2 -->
+            <div class="column is-half">
+                <p>
+                    <i><b><u>Demonstration 2- Visually complex scenario with multiple interactions</u>: Video showing the robot carrying out instruction "Robot, remove the cloth that was used to wipe the table"</b></i> <br>
+                    The robot observes a table with four cloths (two green, one blue, one pink) and a cleaning liquid. 
+                    After a human rearranges the items and cleans with one cloth, the robot is instructed to remove the used cloth. 
+                    It then uses the G<sup>2</sup>TR pipeline to identify and dispose of the correct cloth in the bin.
+                </p>
+                <br>
+                <video id="matting-video" controls playsinline height="100%" width="100%" style="border-radius: 25px;">
+                  <source src="./static/video/DemoVideo4.mp4" type="video/mp4">
+              </video>
+            </div>
+            <!-- Row 1: Text and Video for Demo 1 -->
+            <div class="column is-half">
+              <p>
+                  <i><b><u>Demonstration 3 - Scenario involving partial observability</u> : Video showing robot responding to the question "Robot, where is the marker that I just used?"</b></i> <br>
+                  The robot, with its camera, observes a table with two books, two markers, and a bag. 
+                  A human uses a marker, places it in a book, and then puts the book in the bag. 
+                  The robot is instructed to identify and point to the partially occluded marker. 
+                  Using the G<sup>2</sup>TR pipeline, it successfully identifies and points to the bag containing the marker.
+              </p>
+              <br>
+              <video id="matting-video" controls playsinline height="100%" width="100%" style="border-radius: 25px;">
+                <source src="./static/video/DemoVideo2.mp4" type="video/mp4">
             </video> 
+          </div>
+          
+
+          <!-- Row 2: Text and Video for Demo 2 -->
+          <div class="column is-half">
+              <p>
+                  <i><b><u>Demonstration 4: Multi-hop reasoning scenario</u>: Video showing the robot executing the instruction "Give me the bottle placed second by the human"</b></i> <br>
+                  The robot, equipped with a camera, observes a shelf as a human sequentially places three bottles on it.
+                  Later, another individual instructs the robot to retrieve the second bottle placed. To execute this task, 
+                  the robot leverages the G<sup>2</sup>TR pipeline, 
+                  which performs multi-hop reasoning to identify the correct bottle and the robot successfully fulfills the command.
+              </p>
+              <br>
+              <video id="matting-video" controls playsinline height="100%" width="100%" style="border-radius: 25px;">
+                <source src="./static/video/DemoVideo3.mp4" type="video/mp4">
+            </video>
+          </div>
         </div> 
-      </div> 
-    </div>  
-  </section>>
+    </div>
+</section>
+
+<section class="section", style="text-align: center;"></section>
+    <div class="container is-max-desktop">
+      <!-- Motivation. -->
+      <h2 class="title has-text-centered is-3"> Prompting Details</h2>
+      <div class="content is-four-fifths has-text-justified">
+        <p>
+          To achieve generalized grounded temporal reasoning, 
+          G<sup>2</sup>TR utilizes the reasoning capabilities of several 
+          pre-trained large models. To ensure these models perform 
+          effectively and appropriately for the designated tasks, 
+          various prompts and prompting strategies were explored, as detailed below.
+          <br><br>
+          <b>Temporal Parser</b>: For this parser, an LLM (GPT-4) was employed. 
+          The prompt provided a comprehensive background on the robotic setting, 
+          along with a few-shot learning approach using in-context examples, 
+          enabling it to generate relevant questions for the subsequent modules.
+          <pre><code>
+example_parsing  = ["instruction" : "Pick the bottle that I just placed.",           
+                    "response" : { 
+                    "temporal_question": "When is placing by the person happening in the video? 
+                    Give the exact timestamp.",
+                    "object-interaction" : "the bottle that was placed by the person"       
+                    " action": "Pick"},                
+
+                    "instruction" : "Remove the object that was first eaten",           
+                    "response" : { 
+                    "temporal_question": "When is eating of first object by the person happening 
+                    in the video? Give the exact timestamp. ",   
+                    "object-interaction" : "object eaten by person"             
+                    "action": “Point"},
+
+                    "instruction" : "Where is the apple?",           
+                    "response" : { 
+                    "temporal_question": "When was the apple last seen? Give the exact timestamp.", 
+                    “object-interaction" : "human-interaction happening with apple"               
+                    "action": "Point to"},             
+
+                    "instruction" : "Remove the cloth that was used by the boy",           
+                    "response" : { 
+                    "temporal_question": "When is the using of cloth by the boy happening in the 
+                    video? Give the exact timestamp.",        
+                    "object-interaction" : "cloth used by boy"        
+                    "action": "Remove",}]  
+
+There is a robot that needs to take a human instruction and formulate a temporal question as per instruction, 
+identify the object-interaction of interest and what action to take . Given the human instruction, return a 
+dictionary with 'temporal_question', 'object-interaction’, and 'action' as keys. For the 'object-interaction' 
+key, remove the temporal aspect and clues such as 'at 2nd second' or 'last'. Return answer in JSON format always
+                                              
+          </code></pre>
+          <br>
+          <b>Event Localizer (Candidate Interval Extraction): </b>
+          This module utilizes the temporal reasoning capabilities of the video-understanding VLM 
+          (CogVLM2-video), with the <b>temporal question</b> from the temporal parser serving as the prompt.
+          <br><br>
+          <b>Grounding object of interest: </b>
+          This module employs the spatial reasoning and image understanding features of VLMs 
+          (GPT-4o) along with the grounding capabilities of Phrase Grounding models (GroundingDino1.5-pro), 
+          using the <b>object-interaction </b>from the temporal parser as the initial prompt.
+          <br>
+          <pre><code>
+"From the given images, identify with which OBJECT the INTERACTION happened. Return that object only. The object 
+interaction is : " + object-interaction (from temporal parser)
+          </code></pre>
+          
+          
+          While asking the same image-understanding model to pick the target object from <b>visual options</b>, 
+          the prompt is slightly varied:
+          <pre><code>
+"From the given images, identify with which single OBJECT the INTERACTION happened. The last image given to you has 
+visual options. Pick the right object number with which the INTERACTION is happening.Return object label."
+          </code></pre>
+          
+          In <b>partial observability cases</b>, the target object goes out of view. 
+          In order to track the occluding object, the module is re-prompted as:
+          <pre><code>
+"Where did " + object_class + " go? Give the object that partially or completely hid the " + object_class.
+          </code></pre>
+          <br>
+
+          Example if the target object is a marker, which was kept inside a book, and the book was put in a bag, the prompts would be:
+          <pre><code>
+"Where did the <i>marker</i> go? Give the object that partially or completely hid the <i>marker</i>." 
+
+And once the marker goes out of view and the occluding object is determined to be a book:
+
+"Where did the <i>book</i> go? Give the object that partially or completely hid the <i>book</i>."
+          </code></pre>
+
+
+        
+          
+
+  
+
+      </div>
+  </section>
+
+  <section class="section", style="text-align: center;"></section>
+    <div class="container is-max-desktop">
+      <!-- Alternate Approaches. -->
+      <h2 class="title has-text-centered is-3">Alternate Approaches (Baselines)</h2>
+      <div class="content is-four-fifths has-text-justified">
+        <p>
+          
+        The proposed model, G<sup>2</sup>TR, was compared against two baseline approaches, 
+        each reflecting alternative methods for addressing the temporal reasoning 
+        problem, resulting in different architectures for combining pre-trained models.
+        Only open-set models were included in the evaluation due to their generality.
+        <br><br>    
+        <b>G<sup>2</sup>TR</b>: This model leverages a video-understanding VLM (CogVLM2-video) for candidate 
+        interval identification, followed by target detection and grounding using a Vision 
+        Language Model (GPT-4o) and a Phrase Grounder (GroundingDino1.5-pro). It also integrates 
+        a tracker module (SAM-2) to handle environmental changes.
+
+        <div>
+          <img src="./static/gif/EvalCorpus/G2TR.gif" />
+        </div>
+
+        <br>
+        <b>Direct Temporal Visual Grounding (DTVG)</b>: This approach uses a video-understanding VLM 
+        for both temporal and spatial reasoning, followed by a Phrase Grounder to identify 
+        the intended object, e.g., “green cloth on the left.”
+        <br><br>
+        <div></div>
+          <img src="./static/gif/EvalCorpus/DTVG.gif" />
+        </div>
+
+        
+        <b>Refined Temporal Visual Grounding (RTVG)</b>: Similar to DTVG, this method incorporates 
+        Visual Question Answering (VQA) by the VLM to iteratively refine the object description, 
+        ensuring precise grounding.
+
+        <div></div>
+          <img src="./static/gif/EvalCorpus/RTVG.gif" />
+        </div>
+
+      </div>
+  </section>
 
   <section class="section">
     <div class="container is-max-desktop">
@@ -400,38 +568,112 @@ see.
       <div id="tasks" , class="column has-text-justified">
         <p>
           We have compared the performance of the proposed
-          model G<sup>2</sup>TR with alternative approaches -Direct Temporal Visual Grounding (DTVG) and Refined Temporal Visual Grounding (RTVG).
-           The proposed approach has better performance 
-          than suggested alternate approaches by 26%, in terms
-          of overall average grounding accuracy.
-          We compared the state of the art LVLM and LLM models to realize various aspects of the proposed pipeline. We use GPT4 for both the parsing tasks, GPT-4V for initial scene description, Video-LLaVA for object interaction recognition and CogVLM for semantic object grounding. The experimentation of the entire end-to-end pipeline was carried out on a Franka Emika robot manipulator. The robot observes a person placing an object and later successfully executes the instruction, "robot, pick up the object that I just placed". 
-          The figure below show the accuracy of instruction following for the scenarios partitioned as those containing identical vs. distinct objects on the scene. The overall success rate was obtained as 45.3%. We observe that LVLMs gave incorrect or ambiguous outputs when all the objects on the scene were identical while higher performance for scenarios with distinct objects. Results indicate the lack of robustness in contemporary LVLMs in identifying complex spatial properties.  
+          model G<sup>2</sup>TR with alternative approaches 
+          -Direct Temporal Visual Grounding (DTVG) and Refined Temporal Visual Grounding (RTVG).
+          The proposed approach has better performance 
+          than suggested alternate approaches by <b>26%</b>, in terms
+          of <i>overall average grounding accuracy</i>. It also performs better 
+          than the alternate approaches in each of the different scenarios 
+          that are considered in our dataset bifurcation.
+          <br><br>
+          Analysis of our pipeline,G<sup>2</sup>TR , shows that the <b>main bottleneck </b>
+          is the <i><b>Event Localizer’s</b></i> difficulty in precisely identifying the time instant
+          of the language-referenced interaction. The next bottleneck
+          occurs in the <i><b>Target Detector</b></i>, which struggles with selection
+          of incorrect object class, insufficient visual prompts, or
+          incorrect selection of object label due to ambiguity in visual
+          options. The Tracker occasionally begins tracking the wrong
+          object, when it appears identical to the correct one. 
+          While our approach performs well in complex scenarios,
+          it struggles with rapid human-object interactions and single
+          actions involving multiple objects, such as replacing or
+          stacking. Another limitation of our pipeline is its tendency
+          to perform reasoning based on linguistic cues rather than
+          visual evidence. For instance, when tasked with identifying
+          the object into which water was poured, it may incorrectly
+          output a cup, even if the water was poured into a different
+          container.
         </p>
       </div>
       <hr>
-      <div class="columns is-multiline">
-        <div class="column is-centered is-half">
-          <div class="content">
-            <h3 class="title is-4 has-text-centered">Component-Wise Analysis of Failures</h3>
-            <img src="static/images/component_analysis_v4.drawio.png" alt="GIF 4" style="width: 600px; height: 280px; border-radius: 25px;">
-
-            <p class="teaser has-text-justified">
-              Component-Wise Analysis frequency of failure cases generated by each module</p>
-          </div>
+      
+      <div class="column is-centered is-flex is-flex-direction-column is-align-items-center">
+        <div class="content has-text-centered">
+          <h3 class="title is-4">Component-Wise Analysis of Failure Cases (45/155)</h3>
+          <img src="static/gif/EvalCorpus/failure_case_wheel.gif" alt="GIF 4" style="width: 400px; height: 300px; border-radius: 25px;">
+          <p class="teaser has-text-justified">
+            Component-Wise Analysis frequency of failure cases generated by each module
+          </p>
         </div>
+      </div>
+      
 
-        <div class="column is-centered is-half">
+
+        <div class="column is-centered">
           <div class="content">
             <h3 class="title is-4 has-text-centered">Failure Case Examples</h3>
-            <!-- <p class="has-text-justified">Robot trains to use pendulum object present in the environment to slide the
-              puck to the goal</p> -->
-              <img src="static/images/failure_cases_v2.drawio.png" alt="GIF 4" style="width: 400px; height: 280px; border-radius: 25px;">
+            
+            
+              <!-- First Row of Images -->
+              <div class="columns">
+                <div class="column is-centered is-one-third">
+                    <figure style="position: relative;">
+                      <figcaption style="text-align: center; margin-bottom: 10px; font-size: 15px;"><i><b>Instruction: </b>Robot, pick bottle placed just before orange bottle</i></figcaption>
+                      <img src="static/gif/EvalCorpus/failure_case.gif" alt="Image 1 Description" style="width:100%;">
+                      <p style="text-align: center;"><b>(a) Incorrect time instant</b> (Expected: 5, G<sup>2</sup>TR: 12)</p>
+                    </figure>
+                </div>
+                <div class="column">
+                    <figure>
+                      <figcaption style="text-align: center; margin-bottom: 10px; font-size: 15px;"><i><b>Instruction: </b>Pick the container in which water was poured</i></figcaption>
+                      <img src="static/gif/EvalCorpus/failure_case2.gif" alt="Image 2 Description" style="width:100%;">
+                      <p style="text-align: center;"><b>(b) Incorrect Object Class</b> (Expected: Bottle, G<sup>2</sup>TR: Cup)</p>
+                    </figure>
+                </div>
+                <div class="column">
+                    <figure>
+                      <figcaption style="text-align: center; margin-bottom: 10px;font-size: 15px;"><i><b>Instruction: </b>Pick the container by which water was poured</i></figcaption>
+                      <img src="static/images/failure_case_4.png" alt="Image 3 Description" style="width:100%; height:110 px">
+                      <p style="text-align: center;"><b>(c) Visual Options Ambiguity</b> (Object labels overlapping)</p>
+                    </figure>
+                </div>
+            </div>
+
+            <!-- Second Row of Images -->
+            <div class="columns">
+                <div class="column">
+                    <figure>
+                      <figcaption style="text-align: center; margin-bottom: 10px;font-size: 15px;"><i><b>Instruction: </b>Robot, pick the cup under<br> which strawberry is hidden!</i></figcaption>
+                      <img src="static/gif/EvalCorpus/tracking_lost.gif" alt="Image 4 Description" style="width:60%;">
+                      <p style="text-align: center;"><b>(d) Incorrect Object Tracking</b><br> (Wrong cup tracked)</p>
+                    </figure>
+                </div>
+                <!-- <div class="column">
+                    <figure>
+                      <img src="static/images/failure_case_3.png" alt="Image 5 Description" style="width:100%;">
+                    </figure>
+                </div> -->
+                <div class="column">
+                    <figure>
+                      <figcaption style="text-align: center; margin-bottom: 10px;font-size: 15px;"><i><b>Instruction: </b>Robot, point to the cup which<br> was just used by the person</i></figcaption>
+                      <img src="static/images/failure_case_5.png" alt="Image 6 Description" style="width:60%;">
+                      <p style="text-align: center;"><b>(e) Insufficient Grounding</b> <br>(One cup not grounded)</p>
+                    </figure>
+                </div>
+            </div>
+  
+
+                
+              
+              
             <!-- <video id="matting-video" controls playsinline height="100%" style="border-radius: 25px;
               <source src="./static/video/slide.mp4" type="video/mp4">
             </video> -->
-            <p class="teaser has-text-justified">
-              Examples of Failure Cases displays instances of failure within G<sup>2</sup>TR framework.
-            </p>
+            <div class="is-flex is-justify-content-center">
+              <p class="teaser has-text-justified" style="max-width: 600px;">
+                Examples of Failure Cases displays instances of failure within G<sup>2</sup>TR framework.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -531,27 +773,71 @@ see.
               challenging to learn for model-free methods, highlighting PhyPlan’s adaptability to long-horizon tasks.
             </p> -->
           <!-- </div> -->
-          <!-- OUR DEMO END-->
+          <!-- OUR DEMO END -->
         </div> 
       </div>
     </div>
     
   </section>
 
+  <section class="section", style="text-align: center;"></section>
+    <div class="container is-max-desktop">
+      <!-- Motivation. -->
+      <h2 class="title has-text-centered is-3"> Questions that might arise</h2>
+      <div class="content is-four-fifths has-text-justified">
+        <p>
+        
+        <b><i>a. Why not just use an image-understanding vision language model?</i></b>
+        <br>
+        Ans –  Interactions are inherently temporal, and videos capture the 
+        full sequence, preserving context and flow. Converting this to the 
+        image domain requires sub-sampling, which is challenging as the appropriate 
+        rate depends on the complexity of the action. This can result in losing 
+        crucial details, making video a more reliable medium for understanding interactions.
+        <br><br>
+        <b><i>b. What is the need for grounding propagation via semantic tracking when the target object was already detected?</i></b>
+        <br>
+        Ans – The relative position of the target object might change after the language-referenced interaction 
+        took place. It is essential that its position be determined in the present world scene of the robot.
+        <br><br>
+        <b><i>c. Why provide visual options for the image-understanding vision language model?</i></b>
+        <br>
+        Ans – Converting the spatial description of target object in linguistic description 
+        might be difficult in visually complex scenarios and confuse the grounding model. 
+        It is therefore relatively easier and more effective to ground the object class first 
+        and then pick the target object from these grounded visual options.
+          
+
+  
+
+      </div>
+  </section>
+ 
+
   <section class="section">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Conclusion</h2>
       <div class="column has-text-justified">
         <p>
-          We present G<sup>2</sup>TR, a novel approach to
+        We present G<sup>2</sup>TR, a novel approach to
         grounded temporal reasoning. We factorize the problem into
-        three major components: (i) candidate interval localization
-        in a video based on the required interaction, (ii) fine-grained
+        three key components: (i) candidate interval localization
+        in a video based on required interactions, (ii) fine-grained
         spatial reasoning within the localized interval to ground the
         target object, and (iii) tracking the object post-interaction.
         By leveraging pre-trained visual language models and large
-        language models, our approach is zero-shot generalizable
-        for both the object set and interactions. 
+        language models, G<sup>2</sup>TR achieves zero-shot generalization for
+        both object set and interactions. We also propose a dataset
+        of 155 video-instruction pairs covering spatially complex,
+        multi-hop, partially observable, and multi-interaction tempo-
+        ral reasoning tasks. Evaluation on the dataset shows signif-
+        icant improvement over alternative approaches, highlighting
+        G<sup>2</sup>TR’s potential in robot instruction following. Finally, it
+        is important to note that G2TR currently has two limits: (i)
+        it can only process videos up to one minute, as constrained
+        by the video-reasoning model, and (ii) it can ground only
+        a single object at a time. We aim to overcome both these
+        limitations in future.
         </p>
       </div>
       <hr>
