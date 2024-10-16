@@ -672,11 +672,12 @@ visual options. Pick the right object number with which the INTERACTION is happe
   <section class="section", style="text-align: center;"></section>
     <div class="container is-max-desktop">
       <!-- Motivation. -->
-      <h2 class="title has-text-centered is-3"> Questions that might arise</h2>
+      <h2 class="title has-text-centered is-3"> Additional Insights</h2>
       <div class="content is-four-fifths has-text-justified">
         <p>
         
-        <b><i>a. Why not just use an image-understanding vision language model?</i></b>
+        <b><i>a. Leveraging a combination of specialized temporal and spatial video and image-understanding models can provide 
+          deeper contextual understanding compared to only a general-purpose image-understanding vision-language model.</i></b>
         <br>
         Ans –  Interactions are inherently temporal, and videos capture the 
         full sequence, preserving context and flow. Converting this to the 
@@ -684,12 +685,15 @@ visual options. Pick the right object number with which the INTERACTION is happe
         rate depends on the complexity of the action. This can result in losing 
         crucial details, making video a more reliable medium for understanding interactions.
         <br><br>
-        <b><i>b. What is the need for grounding propagation via semantic tracking when the target object was already detected?</i></b>
+        <b><i>b. Grounding propagation through semantic tracking enhances the G<sup>2</sup>TR's ability to maintain consistent 
+          object identification across frames, even after initial detection, ensuring more robust performance in 
+          dynamic environments.</i></b>
         <br>
         Ans – The relative position of the target object might change after the language-referenced interaction 
         took place. It is essential that its position be determined in the present world scene of the robot.
         <br><br>
-        <b><i>c. Why provide visual options for the image-understanding vision language model?</i></b>
+        <b><i>c. Providing visual options for the image-understanding vision-language model enhances its adaptability by 
+          allowing it to better handle ambiguity and improve decision-making in complex visual scenarios.</i></b>
         <br>
         Ans – Converting the spatial description of target object in linguistic description 
         might be difficult in visually complex scenarios and confuse the grounding model. 
