@@ -756,6 +756,29 @@ object_class = target_ detector_step1_output
         might be difficult in visually complex scenarios and confuse the grounding model. 
         It is therefore relatively easier and more effective to ground the object class first 
         and then pick the target object from these grounded visual options.
+        <br><br>
+        <b><i>d. Challenges in addressing composite interactions involving multiple sub-actions and temporal ambiguities
+          </i></b>
+        <br>
+        The dataset includes scenarios where a single human interaction involves multiple sub-interactions, such as <b><i>"stacking"</i></b> 
+        multiple objects or <b><i>"replacing"</i></b> one object with another. These composite actions, described in instructions like 
+        <i>"Rebuild that stack that I just built"</i> or <i>"Remove the object that replaced the green bottle,"</i> introduce challenges 
+        in determining the precise timestamps of individual actions. This temporal ambiguity occasionally leads to inconsistent 
+        performance, highlighting the need for future work to improve handling of such complex scenarios.
+        <br><br>
+        <b><i>e. Timing efficiency analysis of G<sup>2</sup>TR, highlighting bottlenecks in target detection and the 
+          impact of partial observability</i></b>
+        <br>
+        The timing analysis of G<sup>2</sup>TR reveals that the <b><i>target detection module</i></b> is the most time-consuming, 
+        averaging <b>32.25 ± 1.11</b> seconds under full observability, due to its <i>iterative</i> grounding mechanism. 
+        Event localization and object tracking take <b>5.65 ± 0.10</b> seconds and <b>6.29 ± 0.35</b> seconds, respectively, 
+        resulting in an average runtime of <b>46.98 ± 1.48</b> seconds. Under <i>partial observability</i>, the runtime nearly 
+        doubles to <b>88.57 ± 7.26</b> seconds because of iterative detection and tracking, highlighting a key bottleneck that 
+        limits zero-shot generalization. All experiments were conducted using GPT-4o 
+        <a href="https://arxiv.org/abs/2303.08774" class="external-link is-normal">[GPT-4]</a>
+        and Grounding-DINO 1.5 Pro 
+        <a href="https://arxiv.org/abs/2405.10300" class="external-link is-normal">[Grounding DINO 1.5 Pro]</a>
+        on a server with 48GB GPU memory, accessed via cloud.
           
 
   
