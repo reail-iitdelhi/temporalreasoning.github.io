@@ -422,73 +422,132 @@
           The prompt provides a comprehensive background on the robotic setting, enabling it to generate a temporal
           question, object identification question, and robot actions—that serve as essential inputs for subsequent modules.
           <pre><code>
-example_parsing  = ["instruction" : "Pick the bottle that I just placed.",           
-                    "response" : { 
-                    "temporal_question": "When is placing by the person happening in the video? 
-                    Give the exact timestamp.",
-                    "object-interaction" : "the bottle that was placed by the person"       
-                    " action": "Pick"},                
-
-                    "instruction" : "Remove the object that was first eaten",           
-                    "response" : { 
-                    "temporal_question": "When is eating of first object by the person happening 
-                    in the video? Give the exact timestamp. ",   
-                    "object-interaction" : "object eaten by person"             
-                    "action": “Point"},
-
-                    "instruction" : "Where is the apple?",           
-                    "response" : { 
-                    "temporal_question": "When was the apple last seen? Give the exact timestamp.", 
-                    “object-interaction" : "human-interaction happening with apple"               
-                    "action": "Point to"},             
-
-                    "instruction" : "Remove the cloth that was used by the boy",           
-                    "response" : { 
-                    "temporal_question": "When is the using of cloth by the boy happening in the 
-                    video? Give the exact timestamp.",        
-                    "object-interaction" : "cloth used by boy"        
-                    "action": "Remove",}]  
-
-There is a robot that needs to take a human instruction and formulate a temporal question as per instruction, 
-identify the object-interaction of interest and what action to take . Given the human instruction, return a 
-dictionary with 'temporal_question', 'object-interaction’, and 'action' as keys. For the 'object-interaction' 
-key, remove the temporal aspect and clues such as 'at 2nd second' or 'last'. Return answer in JSON format always
-                                              
+prompt_temporal_parser: |
+"""
+          
+    example_parsing  = [
+          {
+              "instruction" : "Point to the bottle that I just placed.",
+  
+              "ground_truth" : {
+                  "temporal_question": "When is placing by the person happening in the video? 
+                  Give the exact timestamp.",
+                  "action": "Point to",
+                  "object_identification_question": "Identify the bottle that is being placed in these frames."
+  
+              },
+          },
+          {
+              "instruction" : "Remove the object that was first eaten",
+              "ground_truth" : {
+                  "temporal_question": "When is eating of first object by the person happening in the video? 
+                  Give the exact timestamp.",
+                  "action": "Remove",    
+                  "object_identification_question": "Identify the object that is being by the person in these frames."
+              },
+          },
+          {
+              "instruction" : "Remove the object that was placed last",
+              "ground_truth" : {
+                  "temporal_question": "When is placing of last object by the person happening in the video? 
+                  Give the exact timestamp.",
+                  "action": "Remove",    
+                  "object_identification_question": "Identify the object that is being placed by the person 
+                  in these frames."
+              },
+          },
+              {
+              "instruction" : "Where is the apple?",
+              "ground_truth" : {
+                  "temporal_question": "When was the apple last seen? Give the exact timestamp.",
+                  "action": "",   
+                  "object_identification_question": "Where is the apple?" 
+              },
+          },
+          {
+              "instruction" : "Identify the object that was used for cleaning second by the girl",
+              "ground_truth" : {
+                  "temporal_question": "When is the cleaning using a second object by the girl happening in the video? 
+                  Give the exact timestamp.",
+                  "action": "Identify",    
+                  "object_identification_question": "Identify the object used for cleaning by the girl in these frames."
+              },
+          },
+  
+          {
+              "instruction" : "Remove the cloth that was used by the boy",
+              "ground_truth" : {
+                  "temporal_question": "When is the using of cloth by the boy happening in the video? 
+                  Give the exact timestamp.",
+                  "action": "Remove",    
+                  "object_identification_question": "Identify the cloth used by the boy in these frames."
+                  "object" : "cloth used by boy",
+                  "interaction": human-interaction with cloth by the boy
+              },
+          },
+          {
+              "instruction" : "Retrieve the bottle that was filled first by the girl",
+              "ground_truth" : {
+                  "temporal_question": "When is filling of the first bottle happening in the video? 
+                  Give the exact timestamp.",
+                  "action": "Retrieve",    
+                  "object_identification_question": "Identify the object that is being by the person in these frames."
+                  "object" : "bottle that was filled by the girl",
+                  "interaction" : "bottle filling by the girl"
+              },
+          },
+        
+    ]
+  
+There is a robot that needs to take a human instruction and formulate a temporal question as per instruction, what action 
+to take and the object of interest. Given the human instruction, return a dictionary with 'temporal_question', 'action', 
+'object_identification_question', 'object', and 'interaction' as keys. For the 'object' and 'interaction' keys, remove 
+the temporal aspect and clues such as 'at 2nd second' or 'last'. Return answer in JSON format always. 
+"""
           </code></pre>
           <br>
           <b>Event Localizer (Candidate Interval Extraction): </b>
-          This module utilizes the temporal reasoning capabilities of the video-understanding VLM 
-          <a href="https://arxiv.org/abs/2408.16500" class="external-link is-normal">[CogVLM2-video]</a>, 
-                with the <b>temporal question</b> from the temporal parser serving as the prompt.
-          <br><br>
-          <b>Grounding object of interest: </b>
-          This module employs the spatial reasoning and image understanding features of VLMs 
-          <a href="https://arxiv.org/abs/2303.08774" class="external-link is-normal">[GPT-4]</a> 
-          along with the grounding capabilities of Phrase Grounding models
-          <a href="https://arxiv.org/abs/2405.10300" class="external-link is-normal">[Grounding DINO 1.5 Pro]</a> , 
-          using the <b>object-interaction </b>from the temporal parser as the initial prompt.
+          This module leverages the temporal reasoning capabilities of a video-understanding VLM
+          <a href="https://arxiv.org/abs/2408.16500" class="external-link is-normal">[CogVLM2-video]</a>,
+          using the <b>temporal question</b> generated by the aforementioned temporal parser as its input. 
+          <pre><code>
+event_localizer_prompt = json ( temporal_parser_output ) [" temporal_question "]
+          </code></pre>          
           <br>
+
+          <b>Grounding object of interest: </b>
+          The workflow of this module consists of three steps: the first and third steps utilize
+          spatial reasoning and image understanding capabilities of a Vision-Language Model, 
+          <a href="https://arxiv.org/abs/2303.08774" class="external-link is-normal">[GPT-4]</a>
+          while the second step employs
+          grounding capabilities of a Phrase Grounding Model. 
+          <a href="https://arxiv.org/abs/2405.10300" class="external-link is-normal">[Grounding DINO 1.5 Pro]</a>
+          .The prompt for this module, again derived from the temporal
+          parser output, utilizes the object identification question. In the first step, the module retrieves the <b><i>class</i></b> of the object
+          involved in the language-referenced human interaction. In the third step, using the same prompt with an added emphasis,
+          it is used to retrieve the <b><i>object label</i></b> from given visual options.
+          <br>
+
           <pre><code>
-"From the given images, identify with which OBJECT the INTERACTION happened. Return that object only. The object 
-interaction is : " + object-interaction (from temporal parser)
+target_detector_step1_prompt = json(temporal_parser_output)["object_identification_question"] + 
+"Return just the object class."
           </code></pre>
-          
-          
-          While asking the same image-understanding model to pick the target object from <b>visual options</b>, 
-          the prompt is slightly varied:
           <pre><code>
-"From the given images, identify with which single OBJECT the INTERACTION happened. The last image given to you has 
-visual options. Pick the right object number with which the INTERACTION is happening.Return object label."
+target_detector_step3_prompt = json(temporal_parser_output)["object_identification_question"] + 
+"Return just the object label."
           </code></pre>
-          
-          In <b>partial observability cases</b>, the target object goes out of view. 
-          In order to track the occluding object, the module is re-prompted as:
+          <br>
+          <b>Partial Observability Cases:</b>
+          In these cases, as the target object becomes partially observable, the prompts are designed
+          to retrieve the object that is closely associated with or occluding the target-object.
           <pre><code>
+object_class = target_ detector_step1_output
+
 "Where did " + object_class + " go? Give the object that partially or completely hid the " + object_class.
           </code></pre>
           <br>
 
-          Example if the target object is a marker, which was kept inside a book, and the book was put in a bag, the prompts would be:
+          Example if the target object is a <b><i>marker</i></b>, which was kept inside a <b><i>book</i></b>, and the book was put in a <b><i>bag</i></b>, the prompts would be:
           <pre><code>
 "Where did the <i>marker</i> go? Give the object that partially or completely hid the <i>marker</i>." 
 
@@ -496,6 +555,8 @@ visual options. Pick the right object number with which the INTERACTION is happe
 
 "Where did the <i>book</i> go? Give the object that partially or completely hid the <i>book</i>."
           </code></pre>
+
+          Thus, the prompts are iteratively refined and re-issued until the final occluding object is identified.
 
 
         
